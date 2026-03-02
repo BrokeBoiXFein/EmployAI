@@ -159,7 +159,7 @@ const translations = {
     chatPlaceholder: "मुझसे कुछ भी पूछें...",
     chatWelcome: "नमस्ते! मैं आपका जॉब सर्च असिस्टेंट हूँ।",
     matchingJobs: "आपके लिए मेल खाने वाली नौकरियां",
-    searchingJobs: "नौकरियां खोजी जा رہی हैं...",
+    searchingJobs: "नौकरियां खोजी जा रही हैं...",
     viewJob: "जॉब देखें",
     noJobsFound: "कोई नौकरी नहीं मिली।",
     languageName: "Hindi"
@@ -224,7 +224,8 @@ export default function ResumeAnalyzer() {
       formData.append('resume', file);
       formData.append('language', t.languageName);
 
-      const response = await fetch('http://localhost:5000/api/analyze-resume', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${apiUrl}/api/analyze-resume`, {
         method: 'POST',
         body: formData,
       });
@@ -251,7 +252,8 @@ export default function ResumeAnalyzer() {
   const searchJobs = async (jobTitles) => {
     setJobsLoading(true);
     try {
-      const response = await fetch('http://localhost:5000/api/search-jobs', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${apiUrl}/api/search-jobs`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -288,7 +290,8 @@ export default function ResumeAnalyzer() {
         recommendedJobs: analysis.recommendedJobTitles.join(', ')
       } : null;
 
-      const response = await fetch('http://localhost:5000/api/chat', {
+      const apiUrl = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const response = await fetch(`${apiUrl}/api/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
