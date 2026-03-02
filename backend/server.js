@@ -65,7 +65,7 @@ app.post('/api/analyze-resume', upload.single('resume'), async (req, res) => {
 
     const mimeType = req.file.mimetype;
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
     const prompt = `Analyze this resume for an immigrant job matching platform. Extract and provide ONLY a JSON response with no preamble or markdown formatting. 
 
@@ -124,6 +124,7 @@ Structure:
 
     const response = await result.response;
     const text = response.text();
+    console.log('AI Response Text:', text);
     const cleanedText = text.replace(/```json|```/g, '').trim();
     const analysis = JSON.parse(cleanedText);
 
@@ -217,7 +218,7 @@ Recommended Jobs: ${userProfile.recommendedJobs}
 Use this context when relevant to provide personalized advice.`;
     }
 
-    const model = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
 
     const formattedMessages = messages.map(msg => ({
       role: msg.role === 'user' ? 'user' : 'model',
