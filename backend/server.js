@@ -15,7 +15,8 @@ const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 const allowedOrigins = [
   'http://localhost:5173',
   'http://localhost:3000',
-  'https://khander.github.io'
+  'https://BrokeBoiXFein.github.io',
+  'https://brokeboixfein.github.io'
 ];
 
 app.use(cors({
