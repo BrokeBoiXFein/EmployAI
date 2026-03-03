@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "homepage": "https://khander.github.io/immigrant-job-matcher",
+  "homepage": "https://BrokeBoiXFein.github.io/EmployAI",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
