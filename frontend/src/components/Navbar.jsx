@@ -13,7 +13,7 @@ const Navbar = ({ language, setLanguage, translations }) => {
                                 <Globe className="w-6 h-6 text-white" />
                             </div>
                             <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200">
-                                Employ AI
+                                EmployAI
                             </span>
                         </NavLink>
 
