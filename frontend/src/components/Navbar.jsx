@@ -1,18 +1,44 @@
 import React from 'react';
-import { Globe, Languages } from 'lucide-react';
+import { NavLink } from 'react-router-dom';
+import { Globe, Languages, Home, Search } from 'lucide-react';
 
 const Navbar = ({ language, setLanguage, translations }) => {
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-indigo-950/80 backdrop-blur-md border-b border-indigo-900/50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16">
-                    <div className="flex items-center gap-2">
-                        <div className="bg-indigo-600 p-1.5 rounded-lg shadow-lg shadow-indigo-500/20">
-                            <Globe className="w-6 h-6 text-white" />
+                    <div className="flex items-center gap-8">
+                        <NavLink to="/" className="flex items-center gap-2">
+                            <div className="bg-indigo-600 p-1.5 rounded-lg shadow-lg shadow-indigo-500/20">
+                                <Globe className="w-6 h-6 text-white" />
+                            </div>
+                            <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200">
+                                Employ AI
+                            </span>
+                        </NavLink>
+
+                        <div className="hidden md:flex items-center gap-1">
+                            <NavLink
+                                to="/"
+                                className={({ isActive }) =>
+                                    `flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${isActive ? 'bg-white/10 text-white' : 'text-indigo-200/60 hover:text-white hover:bg-white/5'
+                                    }`
+                                }
+                            >
+                                <Home className="w-4 h-4" />
+                                Home
+                            </NavLink>
+                            <NavLink
+                                to="/analyze"
+                                className={({ isActive }) =>
+                                    `flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${isActive ? 'bg-white/10 text-white' : 'text-indigo-200/60 hover:text-white hover:bg-white/5'
+                                    }`
+                                }
+                            >
+                                <Search className="w-4 h-4" />
+                                Analyze
+                            </NavLink>
                         </div>
-                        <span className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-indigo-200">
-                            EmployAI
-                        </span>
                     </div>
 
                     <div className="flex items-center gap-4">

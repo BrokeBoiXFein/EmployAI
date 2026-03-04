@@ -1,6 +1,6 @@
 export const translations = {
     en: {
-        title: "EmployAI",
+        title: "Employ AI",
         subtitle: "Upload your resume and let AI find your perfect job match",
         uploadResume: "Upload Your Resume",
         uploadHint: "PDF, Word, or Image • Any Language",
@@ -27,7 +27,7 @@ export const translations = {
         languageName: "English"
     },
     es: {
-        title: "EmployAI",
+        title: "Employ AI",
         subtitle: "Sube tu currículum y deja que la IA encuentre tu trabajo ideal",
         uploadResume: "Subir Currículum",
         uploadHint: "PDF, Word o Imagen • Cualquier Idioma",
@@ -54,7 +54,7 @@ export const translations = {
         languageName: "Spanish"
     },
     fr: {
-        title: "EmployAI",
+        title: "Employ AI",
         subtitle: "Téléchargez votre CV et laissez l'IA trouver votre emploi idéal",
         uploadResume: "Télécharger le CV",
         uploadHint: "PDF, Word ou Image • Toute Langue",
@@ -81,7 +81,7 @@ export const translations = {
         languageName: "French"
     },
     ar: {
-        title: "EmployAI",
+        title: "Employ AI",
         subtitle: "ارفع سيرتك الذاتية ودع الذكاء الاصطناعي يجد لك الوظيفة المثالية",
         uploadResume: "تحميل السيرة الذاتية",
         uploadHint: "PDF أو Word أو صورة • أي لغة",
@@ -108,7 +108,7 @@ export const translations = {
         languageName: "Arabic"
     },
     zh: {
-        title: "EmployAI",
+        title: "Employ AI",
         subtitle: "上传您的简历，让人工智能为您找到完美的工作",
         uploadResume: "上传简历",
         uploadHint: "PDF、Word 或图片 • 任何语言",
@@ -135,7 +135,7 @@ export const translations = {
         languageName: "Chinese"
     },
     hi: {
-        title: "EmployAI",
+        title: "Employ AI",
         subtitle: "अपना रिज्यूमे अपलोड करें और AI को आपके लिए सही जॉब खोजने दें",
         uploadResume: "रिज्यूमे अपलोड करें",
         uploadHint: "PDF, Word या इमेज • कोई भी भाषा",

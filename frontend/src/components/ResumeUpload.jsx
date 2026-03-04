@@ -3,7 +3,7 @@ import { Upload, FileText, Loader2 } from 'lucide-react';
 
 const ResumeUpload = ({ file, handleFileUpload, analyzeResume, loading, t }) => {
     return (
-        <div className="max-w-3xl mx-auto mb-16">
+        <div className="max-w-3xl mx-auto mb-10">
             <div className="bg-indigo-900/30 backdrop-blur-xl border border-indigo-700/50 p-8 rounded-3xl shadow-2xl shadow-indigo-950/50 transition-all hover:border-indigo-600/50 group">
                 <div
                     className="relative border-2 border-dashed border-indigo-800/80 rounded-2xl p-10 text-center transition-all group-hover:border-indigo-500/50 group-hover:bg-indigo-900/20"
@@ -35,8 +35,8 @@ const ResumeUpload = ({ file, handleFileUpload, analyzeResume, loading, t }) => 
                         onClick={analyzeResume}
                         disabled={loading}
                         className={`w-full mt-6 py-4 px-6 rounded-2xl font-bold text-white shadow-xl shadow-indigo-900/20 flex items-center justify-center gap-3 transition-all active:scale-95 ${loading
-                                ? 'bg-indigo-800/50 cursor-not-allowed'
-                                : 'bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500'
+                            ? 'bg-indigo-800/50 cursor-not-allowed'
+                            : 'bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500'
                             }`}
                     >
                         {loading ? (
