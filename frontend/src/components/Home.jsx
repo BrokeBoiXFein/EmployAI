@@ -1,9 +1,10 @@
 import React from 'react';
+import { NavLink } from 'react-router-dom';
 import {
     LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
     BarChart, Bar, Cell
 } from 'recharts';
-import { Target, Users, TrendingUp, ShieldCheck } from 'lucide-react';
+import { Target, Users, TrendingUp, ShieldCheck, ArrowRight } from 'lucide-react';
 
 const immigrationData = [
     { year: '2013', arrivals: 990553 },
@@ -72,9 +73,9 @@ const Home = ({ t }) => {
                     </div>
                 </div>
 
-                <div className="bg-white/5 border border-white/10 p-6 rounded-3xl h-[400px]">
-                    <h3 className="text-lg font-medium text-indigo-300 mb-4">Annual Authorized Immigrant Arrivals to the U.S.</h3>
-                    <ResponsiveContainer width="100%" height="90%">
+                <div className="bg-white/5 border border-white/10 p-6 rounded-3xl h-[400px] flex flex-col">
+                    <h3 className="text-lg font-medium text-indigo-300 mb-2">Annual Authorized Immigrant Arrivals to the U.S.</h3>
+                    <ResponsiveContainer width="100%" height="80%">
                         <LineChart data={immigrationData}>
                             <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
                             <XAxis dataKey="year" stroke="#94a3b8" fontSize={12} />
@@ -86,6 +87,9 @@ const Home = ({ t }) => {
                             <Line type="monotone" dataKey="arrivals" stroke="#6366f1" strokeWidth={3} dot={{ fill: '#6366f1' }} activeDot={{ r: 8 }} />
                         </LineChart>
                     </ResponsiveContainer>
+                    <p className="text-[10px] text-gray-500 mt-2 text-right">
+                        Source: Department of Homeland Security / BLS Data Visualization 2024
+                    </p>
                 </div>
             </section>
 
@@ -110,9 +114,9 @@ const Home = ({ t }) => {
 
             {/* Future Impacts */}
             <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-                <div className="bg-white/5 border border-white/10 p-6 rounded-3xl h-[400px] order-2 lg:order-1">
-                    <h3 className="text-lg font-medium text-indigo-300 mb-4">Projected Labor Market Integration Efficiency</h3>
-                    <ResponsiveContainer width="100%" height="90%">
+                <div className="bg-white/5 border border-white/10 p-6 rounded-3xl h-[400px] order-2 lg:order-1 flex flex-col">
+                    <h3 className="text-lg font-medium text-indigo-300 mb-2">Projected Labor Market Integration Efficiency</h3>
+                    <ResponsiveContainer width="100%" height="80%">
                         <BarChart data={impactData} layout="vertical">
                             <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" horizontal={false} />
                             <XAxis type="number" hide />
@@ -128,6 +132,9 @@ const Home = ({ t }) => {
                             </Bar>
                         </BarChart>
                     </ResponsiveContainer>
+                    <p className="text-[10px] text-gray-500 mt-2 text-left">
+                        Source: U.S. Bureau of Labor Statistics (JOLTS) / EmployAI Research 2024
+                    </p>
                 </div>
                 <div className="space-y-6 order-1 lg:order-2">
                     <h2 className="text-3xl font-bold text-white">Future Impacts</h2>
@@ -149,6 +156,23 @@ const Home = ({ t }) => {
                             Potential to serve refugees, asylum seekers, and marginalized groups.
                         </p>
                     </div>
+                </div>
+            </section>
+
+            {/* CTA Section */}
+            <section className="text-center pt-8">
+                <div className="p-12 bg-gradient-to-br from-indigo-600/20 to-blue-600/20 rounded-[3rem] border border-white/10 backdrop-blur-sm">
+                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Ready to find your match?</h2>
+                    <p className="text-gray-300 mb-10 max-w-2xl mx-auto">
+                        Upload your resume and let our AI-powered framework connect you with opportunities that match your global expertise.
+                    </p>
+                    <NavLink
+                        to="/analyze"
+                        className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold py-4 px-10 rounded-2xl shadow-xl shadow-indigo-900/40 transition-all hover:scale-105 active:scale-95 group"
+                    >
+                        Start Analysis
+                        <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
+                    </NavLink>
                 </div>
             </section>
         </div>
