@@ -42,6 +42,11 @@ export default function Analyzer({ language, t, translations, setLanguage }) {
     const [jobs, setJobs] = useState([]);
     const [jobsLoading, setJobsLoading] = useState(false);
 
+    // Track which Adzuna job ids the user has saved or applied to, so the
+    // JobMatches cards can render the right state. Using Sets for O(1) lookup.
+    const [savedIds, setSavedIds] = useState(() => new Set());
+    const [appliedIds, setAppliedIds] = useState(() => new Set());
+
     // Chat state
     const [chatOpen, setChatOpen] = useState(false);
     const [messages, setMessages] = useState([]);
@@ -52,24 +57,89 @@ export default function Analyzer({ language, t, translations, setLanguage }) {
         setMessages([{ role: 'assistant', content: t.chatWelcome }]);
     }, [language, t.chatWelcome]);
 
-    // On mount: load the user's resume library. If there's an active
-    // resume, kick off a job search for its recommended titles.
+    // On mount: load the user's resume library + saved/applied lists.
+    // Running in parallel — none of them depend on each other.
     useEffect(() => {
         (async () => {
             try {
-                const { resumes, activeResumeId } = await api.get('/api/resumes');
-                setResumes(resumes);
-                setActiveResumeId(activeResumeId);
+                const [resumesRes, savedRes, appsRes] = await Promise.all([
+                    api.get('/api/resumes'),
+                    api.get('/api/saved').catch(() => ({ savedJobs: [] })),
+                    api.get('/api/applications').catch(() => ({ applications: [] }))
+                ]);
+                setResumes(resumesRes.resumes);
+                setActiveResumeId(resumesRes.activeResumeId);
+                setSavedIds(new Set(savedRes.savedJobs.map(j => j.adzunaId)));
+                setAppliedIds(new Set(appsRes.applications.map(a => a.adzunaId)));
 
-                const active = resumes.find(r => r.id === activeResumeId);
-                const titles = active?.parsedData?.recommendedJobTitles;
-                if (titles && titles.length > 0) await searchJobs(titles);
+                if (resumesRes.activeResumeId) await searchJobs(resumesRes.activeResumeId);
             } catch (err) {
-                console.warn('Resume load failed:', err.message);
+                console.warn('Initial load failed:', err.message);
             }
         })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
+
+    // ----- Save / Apply handlers ---------------------------------
+    // Optimistic UI: we update the Set first, then call the API. If
+    // the API fails, we revert. Feels instant to the user.
+
+    const toggleSave = async (job) => {
+        const id = String(job.id);
+        const isSaved = savedIds.has(id);
+        // Optimistic toggle
+        setSavedIds(prev => {
+            const next = new Set(prev);
+            if (isSaved) next.delete(id); else next.add(id);
+            return next;
+        });
+        try {
+            if (isSaved) {
+                await api.del(`/api/saved/by-adzuna/${id}`);
+            } else {
+                await api.post('/api/saved', {
+                    adzunaId: id,
+                    title: job.title,
+                    company: job.company?.display_name || null,
+                    location: job.location?.display_name || null,
+                    salaryMin: job.salary_min ?? null,
+                    salaryMax: job.salary_max ?? null,
+                    description: stripHtml(job.description).slice(0, 1000),
+                    applyUrl: job.redirect_url,
+                    matchScore: typeof job.matchScore === 'number' ? job.matchScore : null
+                });
+            }
+        } catch (err) {
+            // Revert on failure
+            console.error('Save toggle error:', err);
+            setSavedIds(prev => {
+                const next = new Set(prev);
+                if (isSaved) next.add(id); else next.delete(id);
+                return next;
+            });
+        }
+    };
+
+    const markApplied = async (job) => {
+        const id = String(job.id);
+        if (appliedIds.has(id)) return; // already applied — no-op
+        setAppliedIds(prev => new Set(prev).add(id)); // optimistic
+        try {
+            await api.post('/api/applications', {
+                adzunaId: id,
+                title: job.title,
+                company: job.company?.display_name || null,
+                applyUrl: job.redirect_url
+            });
+        } catch (err) {
+            console.error('Mark applied error:', err);
+            setAppliedIds(prev => {
+                const next = new Set(prev);
+                next.delete(id);
+                return next;
+            });
+        }
+    };
 
     const handleFileUpload = async (e) => {
         const uploadedFile = e.target.files[0];
@@ -98,8 +168,7 @@ export default function Analyzer({ language, t, translations, setLanguage }) {
             // if it returned activeResumeId), switch the display to it
             if (data.becameActive) {
                 setActiveResumeId(data.resume.id);
-                const titles = data.analysis?.recommendedJobTitles;
-                if (titles && titles.length > 0) await searchJobs(titles);
+                await searchJobs(data.resume.id);
             }
 
             setFile(null);
@@ -116,20 +185,21 @@ export default function Analyzer({ language, t, translations, setLanguage }) {
         try {
             await api.post(`/api/resumes/${newId}/activate`);
             setActiveResumeId(newId);
-            const r = resumes.find(x => x.id === newId);
-            const titles = r?.parsedData?.recommendedJobTitles;
             setJobs([]);
-            if (titles && titles.length > 0) await searchJobs(titles);
+            await searchJobs(newId);
         } catch (err) {
             console.error('Switch resume error:', err);
             setError(err.message);
         }
     };
 
-    const searchJobs = async (jobTitles) => {
+    // Backend: looks up resume by id, uses its embedding to score & sort
+    // jobs from Adzuna by semantic similarity. Returns jobs[].matchScore in [-1, 1].
+    const searchJobs = async (resumeId) => {
+        if (!resumeId) return;
         setJobsLoading(true);
         try {
-            const data = await api.post('/api/search-jobs', { jobTitles });
+            const data = await api.post('/api/search-jobs', { resumeId });
             if (data.success) setJobs(data.jobs);
         } catch (err) {
             console.error('Job search error:', err);
@@ -237,6 +307,10 @@ export default function Analyzer({ language, t, translations, setLanguage }) {
                         t={t}
                         formatSalary={formatSalary}
                         stripHtml={stripHtml}
+                        savedIds={savedIds}
+                        appliedIds={appliedIds}
+                        onToggleSave={toggleSave}
+                        onMarkApplied={markApplied}
                     />
                 </div>
             )}

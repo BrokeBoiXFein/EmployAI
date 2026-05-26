@@ -21,6 +21,7 @@ const fs = require('fs').promises;
 const prisma = require('../db');
 const { requireAuth } = require('../middleware/auth');
 const { analyzeResumeFile } = require('../services/gemini');
+const { embedText, buildResumeText } = require('../services/embeddings');
 
 const router = express.Router();
 router.use(requireAuth);
@@ -107,8 +108,21 @@ router.post('/', upload.single('resume'), async (req, res) => {
       (analysis.name && analysis.name.trim()) ||
       defaultLabelFromFilename(req.file.originalname);
 
-    // 3. Create the Resume row.
-    // 4. If this is the user's FIRST resume, auto-set it as active.
+    // 3. Compute the resume embedding — a 384-number vector that captures
+    // the candidate's "shape" in semantic space. Cached on the row so we
+    // never re-embed unless the resume itself changes.
+    let embedding = null;
+    try {
+      embedding = await embedText(buildResumeText(analysis));
+    } catch (embedErr) {
+      // If the model fails to load (e.g. no internet on first run), don't
+      // block the upload — the resume still saves, just without a vector.
+      // /api/search-jobs will lazily backfill on next request.
+      console.warn('Resume embedding failed; will backfill later:', embedErr.message);
+    }
+
+    // 4. Create the Resume row.
+    // 5. If this is the user's FIRST resume, auto-set it as active.
     // Both in one transaction so we don't end up half-done if one fails.
     const result = await prisma.$transaction(async (tx) => {
       const resume = await tx.resume.create({
@@ -117,7 +131,8 @@ router.post('/', upload.single('resume'), async (req, res) => {
           label,
           parsedData: analysis,
           detectedLanguage: analysis.originalLanguage || null,
-          candidateName: analysis.name || null
+          candidateName: analysis.name || null,
+          embedding
         }
       });
 

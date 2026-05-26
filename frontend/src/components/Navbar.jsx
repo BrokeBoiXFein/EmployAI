@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink, Link, useNavigate } from 'react-router-dom';
-import { Globe, Languages, Home, Search, LogIn, UserPlus, LogOut, User, FileText } from 'lucide-react';
+import { Globe, Languages, Home, Search, LogIn, UserPlus, LogOut, User, FileText, Briefcase } from 'lucide-react';
 import { useAuth } from '../store/auth';
 
 const Navbar = ({ language, setLanguage, translations }) => {
@@ -58,6 +58,16 @@ const Navbar = ({ language, setLanguage, translations }) => {
                             >
                                 <FileText className="w-4 h-4" />
                                 Resumes
+                            </NavLink>
+                            <NavLink
+                                to="/jobs"
+                                className={({ isActive }) =>
+                                    `flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${isActive ? 'bg-white/10 text-white' : 'text-indigo-200/60 hover:text-white hover:bg-white/5'
+                                    }`
+                                }
+                            >
+                                <Briefcase className="w-4 h-4" />
+                                Jobs
                             </NavLink>
                         </div>
                     </div>

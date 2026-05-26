@@ -11,6 +11,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Resumes from './pages/Resumes';
+import Jobs from './pages/Jobs';
 
 export default function App() {
   const [language, setLanguage] = useState('en');
@@ -52,6 +53,14 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <Resumes />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/jobs"
+              element={
+                <ProtectedRoute>
+                  <Jobs />
                 </ProtectedRoute>
               }
             />
