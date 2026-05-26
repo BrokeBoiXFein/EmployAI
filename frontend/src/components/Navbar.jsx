@@ -1,8 +1,19 @@
 import React from 'react';
-import { NavLink } from 'react-router-dom';
-import { Globe, Languages, Home, Search } from 'lucide-react';
+import { NavLink, Link, useNavigate } from 'react-router-dom';
+import { Globe, Languages, Home, Search, LogIn, UserPlus, LogOut, User, FileText } from 'lucide-react';
+import { useAuth } from '../store/auth';
 
 const Navbar = ({ language, setLanguage, translations }) => {
+    const user = useAuth(s => s.user);
+    const loading = useAuth(s => s.loading);
+    const logout = useAuth(s => s.logout);
+    const navigate = useNavigate();
+
+    const handleLogout = () => {
+        logout();
+        navigate('/');
+    };
+
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 bg-indigo-950/80 backdrop-blur-md border-b border-indigo-900/50">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -38,10 +49,20 @@ const Navbar = ({ language, setLanguage, translations }) => {
                                 <Search className="w-4 h-4" />
                                 Analyze
                             </NavLink>
+                            <NavLink
+                                to="/resumes"
+                                className={({ isActive }) =>
+                                    `flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-medium transition-all ${isActive ? 'bg-white/10 text-white' : 'text-indigo-200/60 hover:text-white hover:bg-white/5'
+                                    }`
+                                }
+                            >
+                                <FileText className="w-4 h-4" />
+                                Resumes
+                            </NavLink>
                         </div>
                     </div>
 
-                    <div className="flex items-center gap-4">
+                    <div className="flex items-center gap-3">
                         <div className="flex items-center gap-2 bg-indigo-900/40 border border-indigo-800/50 rounded-full px-3 py-1.5 transition-all hover:bg-indigo-900/60">
                             <Languages className="w-4 h-4 text-indigo-300" />
                             <select
@@ -57,6 +78,42 @@ const Navbar = ({ language, setLanguage, translations }) => {
                                 <option value="hi" className="bg-indigo-950">हिन्दी</option>
                             </select>
                         </div>
+
+                        {/* Auth controls. While the store is hydrating (first ~200ms after
+                            page load), render nothing to avoid a "Login → Logout" flash. */}
+                        {!loading && (user ? (
+                            <div className="flex items-center gap-2">
+                                <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-900/40 border border-indigo-800/50">
+                                    <User className="w-4 h-4 text-indigo-300" />
+                                    <span className="text-sm text-white truncate max-w-[120px]">{user.name || user.email}</span>
+                                </div>
+                                <button
+                                    onClick={handleLogout}
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm text-indigo-200/80 hover:text-white hover:bg-white/5 transition"
+                                    title="Log out"
+                                >
+                                    <LogOut className="w-4 h-4" />
+                                    <span className="hidden sm:inline">Log out</span>
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex items-center gap-1">
+                                <Link
+                                    to="/login"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm text-indigo-200/80 hover:text-white hover:bg-white/5 transition"
+                                >
+                                    <LogIn className="w-4 h-4" />
+                                    <span className="hidden sm:inline">Log in</span>
+                                </Link>
+                                <Link
+                                    to="/signup"
+                                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm bg-indigo-600 hover:bg-indigo-500 text-white transition shadow-lg shadow-indigo-500/20"
+                                >
+                                    <UserPlus className="w-4 h-4" />
+                                    <span className="hidden sm:inline">Sign up</span>
+                                </Link>
+                            </div>
+                        ))}
                     </div>
                 </div>
             </div>

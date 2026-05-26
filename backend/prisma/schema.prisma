@@ -1,0 +1,124 @@
+// ============================================================
+// EmployAI database schema
+// ============================================================
+// This file is read by Prisma (our ORM = "translator between
+// JavaScript objects and SQL tables"). When we run a migration,
+// Prisma compares this file to the actual database and figures
+// out the SQL needed to make them match.
+//
+// Read this file like a blueprint. Each `model X { ... }` block
+// becomes one table in Postgres.
+// ============================================================
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ------------------------------------------------------------
+// User — the anchor for everything
+// ------------------------------------------------------------
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String?
+  preferredLanguage String @default("English")
+  createdAt    DateTime @default(now())
+
+  // The user's collection of saved resumes (could be many: "Tech resume",
+  // "Healthcare resume", etc.). Each upload creates a new Resume row.
+  resumes      Resume[] @relation("UserResumes")
+
+  // Which resume is currently "active" — the one used for job matching,
+  // chat context, and the default analyze view. Nullable: a brand-new
+  // user hasn't uploaded anything yet, so they have no active resume.
+  activeResumeId String? @unique
+  activeResume   Resume? @relation("ActiveResume", fields: [activeResumeId], references: [id], onDelete: SetNull)
+  // onDelete: SetNull = if the active resume gets deleted, just clear
+  // the pointer; don't cascade-delete the user.
+
+  savedJobs    SavedJob[]
+  applications Application[]
+}
+
+// ------------------------------------------------------------
+// Resume — one parsed resume document
+// ------------------------------------------------------------
+// A user can have many of these. Each upload creates a new one.
+// Forward-compatible with future ResumeVersion table: when we add
+// in-app editing, we'll move parsedData into versions, and Resume
+// will just track the latest one. No data migration needed today.
+model Resume {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation("UserResumes", fields: [userId], references: [id], onDelete: Cascade)
+
+  // User-facing label. Defaults to the original filename minus extension
+  // (e.g. "tech_resume"). User can rename via PATCH /api/resumes/:id.
+  label     String
+
+  // The parsed resume JSON from Gemini (same shape as before)
+  parsedData Json
+
+  // Pulled out as separate columns so we can sort/filter without JSON queries
+  detectedLanguage String?
+  candidateName    String?
+
+  // Sentence-BERT embedding (Step 3 will compute these)
+  embedding Json?
+
+  // Back-relation needed because User has activeResumeId pointing here.
+  // One Resume can be the active one for 0-or-1 User.
+  activeForUser User? @relation("ActiveResume")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+// ------------------------------------------------------------
+// SavedJob — "bookmark this job for later"
+// ------------------------------------------------------------
+model SavedJob {
+  id           String   @id @default(cuid())
+  userId       String
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  adzunaId     String
+  title        String
+  company      String?
+  location     String?
+  salaryMin    Float?
+  salaryMax    Float?
+  description  String?
+  applyUrl     String
+
+  matchScore   Float?
+
+  savedAt      DateTime @default(now())
+
+  @@unique([userId, adzunaId])
+}
+
+// ------------------------------------------------------------
+// Application — "I clicked apply on this job"
+// ------------------------------------------------------------
+model Application {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  adzunaId    String
+  title       String
+  company     String?
+  applyUrl    String
+
+  status      String   @default("APPLIED")
+  notes       String?
+  appliedAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
