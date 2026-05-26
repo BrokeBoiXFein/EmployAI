@@ -1,70 +1,72 @@
-# Getting Started with Create React App
+# EmployAI
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+**A multilingual AI-powered job search tool built for immigrants.**
 
-## Available Scripts
+Upload your resume in any of six languages → get a translated analysis, semantically-ranked job matches, and a complete US-tailored resume you can download as Word. Designed to remove the language, formatting, and credential barriers that quietly keep qualified immigrant talent out of US jobs.
 
-In the project directory, you can run:
+**Live demo:** https://BrokeBoiXFein.github.io/EmployAI/
 
-### `npm start`
+> First load takes ~30–60s while the backend wakes up (Render free tier sleeps after 15 min of inactivity).
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+---
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+## What it does
 
-### `npm test`
+- **Upload a resume in any language** (PDF, Word, or image). Gemini 2.5 Flash parses it into a structured profile and translates it into the user's chosen language.
+- **Maps foreign credentials to US equivalents** and suggests relevant US certifications.
+- **Semantic job matching:** every resume gets a 3,072-dimensional embedding (Google `gemini-embedding-001`); live Adzuna job listings get the same; cosine similarity ranks results with a color-coded % match badge.
+- **Multi-resume library:** save many versions ("Tech resume," "Healthcare resume"), one active at a time.
+- **Save & track applications:** heart-to-save, mark-applied button, status pipeline (Applied → Interviewing → Offered / Rejected / Withdrawn), per-job notes.
+- **Resume Studio:**
+  - *Coach* — typed suggestion cards (rewrite bullet, add skill, etc.) with Apply/Skip; applying invalidates the embedding so your next job search reflects the improvement.
+  - *Builder* — generates a complete US-tailored resume in one shot. Three templates (Chronological / Hybrid / Skills-first). Inline preview + downloadable `.docx`.
+- **Low-match coach:** when your top job score drops below 55%, a banner opens the chat with a pre-filled "what should I improve?" prompt — the assistant already has your profile in context.
+- **Six UI languages** (English, Spanish, French, Arabic with RTL, Chinese, Hindi).
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## Tech stack
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- **Frontend** — React 19 + Vite + Tailwind CSS · Zustand for auth state · deployed to GitHub Pages
+- **Backend** — Node + Express · Prisma ORM over Postgres (Neon) · JWT auth with bcrypt · deployed to Render
+- **AI** — Google Gemini 2.5 Flash (parsing, suggestions, builder, chat) · `gemini-embedding-001` (matching)
+- **External** — Adzuna API (job listings) · `docx` package for Word export
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+## Run it locally
 
-### `npm run eject`
+```bash
+# 1. Backend (terminal A)
+cd backend
+npm install
+cp .env.example .env          # then fill in DATABASE_URL, JWT_SECRET, GEMINI_API_KEY, ADZUNA_*
+npx prisma migrate dev        # set up the database
+npm run dev                   # listens on :5000
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+# 2. Frontend (terminal B)
+cd frontend
+npm install
+npm run dev                   # opens http://localhost:5173/EmployAI/
+```
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+You'll need:
+- A free Neon Postgres database — get a connection string at https://neon.tech
+- A Gemini API key — https://aistudio.google.com/apikey
+- Adzuna API credentials — https://developer.adzuna.com/
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+---
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+## Documentation
 
-## Learn More
+- **[docs/EmployAI_Proposal.docx](docs/EmployAI_Proposal.docx)** — full project report (mirrors the original SAAWA proposal; methodology section describes what's actually built and why)
+- **[docs/EmployAI_Beginners_Guide.docx](docs/EmployAI_Beginners_Guide.docx)** — plain-English explainer of how embeddings, LLMs, and the architecture work, for readers with no programming background
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+---
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+## Authors
 
-### Code Splitting
+Alexander Apostol · Ayaan Khandelwal · Richard Nie · Srinivasa Polisetty
+Jericho Senior High School, Jericho, NY
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Built for the SAAWA Bright Mind project.
