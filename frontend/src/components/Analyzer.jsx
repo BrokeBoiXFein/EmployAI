@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, ChevronDown, FolderOpen } from 'lucide-react';
+import { FileText, ChevronDown, FolderOpen, Lightbulb, X, MessageCircle } from 'lucide-react';
 import ResumeUpload from './ResumeUpload';
 import AnalysisResults from './AnalysisResults';
 import JobMatches from './JobMatches';
@@ -52,6 +52,23 @@ export default function Analyzer({ language, t, translations, setLanguage }) {
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
     const [chatLoading, setChatLoading] = useState(false);
+
+    // "Low match" coach banner — shown when the top job match falls below
+    // our threshold. Dismissed per session so the user isn't nagged.
+    const LOW_MATCH_THRESHOLD = 0.55;
+    const [bannerDismissed, setBannerDismissed] = useState(false);
+    const topScore = jobs[0]?.matchScore;
+    const showLowMatchBanner = (
+        !bannerDismissed &&
+        !jobsLoading &&
+        jobs.length > 0 &&
+        typeof topScore === 'number' &&
+        topScore < LOW_MATCH_THRESHOLD
+    );
+
+    // Reset dismissal whenever we run a new search — if their next resume
+    // also has low matches, we want to offer help again.
+    useEffect(() => { setBannerDismissed(false); }, [activeResumeId]);
 
     useEffect(() => {
         setMessages([{ role: 'assistant', content: t.chatWelcome }]);
@@ -208,9 +225,12 @@ export default function Analyzer({ language, t, translations, setLanguage }) {
         }
     };
 
-    const sendMessage = async () => {
-        if (!inputMessage.trim() || chatLoading) return;
-        const userMessage = inputMessage.trim();
+    // Accepts an optional explicit text. When called without args, falls back
+    // to the input-field contents (default ChatWidget behavior). This lets
+    // the low-match banner trigger a sendMessage without typing through the input.
+    const sendMessage = async (text) => {
+        const userMessage = (typeof text === 'string' ? text : inputMessage).trim();
+        if (!userMessage || chatLoading) return;
         setInputMessage('');
         setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
         setChatLoading(true);
@@ -243,6 +263,19 @@ export default function Analyzer({ language, t, translations, setLanguage }) {
         } finally {
             setChatLoading(false);
         }
+    };
+
+    // Open the chat widget AND send a specific message. Used by the
+    // low-match banner — opens the widget first so the user sees the
+    // exchange happen, then fires the coaching prompt.
+    const askChatForHelp = (pct) => {
+        const topTitle = jobs[0]?.title ? ` (top match was "${jobs[0].title}")` : '';
+        const prompt =
+            `My best job match is only ${pct}%${topTitle}. What specific changes should I make ` +
+            `to my resume — and what alternative job titles should I consider — to find better-fitting jobs?`;
+        setChatOpen(true);
+        sendMessage(prompt);
+        setBannerDismissed(true); // hide the banner once they've engaged
     };
 
     const handleKeyPress = (e) => {
@@ -295,6 +328,38 @@ export default function Analyzer({ language, t, translations, setLanguage }) {
             {error && (
                 <div className="max-w-3xl mx-auto mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-center animate-in shake duration-500">
                     {error}
+                </div>
+            )}
+
+            {showLowMatchBanner && (
+                <div className="max-w-5xl mx-auto mb-6 flex items-start gap-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 backdrop-blur-md">
+                    <div className="bg-amber-500/20 p-2 rounded-xl shrink-0">
+                        <Lightbulb className="w-5 h-5 text-amber-300" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-white font-semibold">
+                            Your top match is only {Math.max(0, Math.round(topScore * 100))}%.
+                        </p>
+                        <p className="text-amber-200/80 text-sm mt-0.5">
+                            Want the AI assistant to suggest specific resume tweaks or alternative job titles to explore?
+                        </p>
+                    </div>
+                    <div className="flex items-center gap-2 shrink-0">
+                        <button
+                            onClick={() => askChatForHelp(Math.max(0, Math.round(topScore * 100)))}
+                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold bg-amber-500 hover:bg-amber-400 text-amber-950 shadow-lg shadow-amber-500/20 transition"
+                        >
+                            <MessageCircle className="w-4 h-4" />
+                            Get tips
+                        </button>
+                        <button
+                            onClick={() => setBannerDismissed(true)}
+                            className="p-2 rounded-xl text-amber-200/70 hover:text-white hover:bg-white/5 transition"
+                            title="Dismiss"
+                        >
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
                 </div>
             )}
 

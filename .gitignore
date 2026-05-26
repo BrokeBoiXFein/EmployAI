@@ -25,6 +25,7 @@ yarn-error.log*
 # Editers
 .vscode/
 .idea/
+.claude/
 *.suo
 *.ntvs*
 *.njsproj

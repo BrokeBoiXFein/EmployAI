@@ -20,8 +20,62 @@ const path = require('path');
 const fs = require('fs').promises;
 const prisma = require('../db');
 const { requireAuth } = require('../middleware/auth');
-const { analyzeResumeFile } = require('../services/gemini');
+const { analyzeResumeFile, suggestResumeImprovements, buildTailoredResume } = require('../services/gemini');
 const { embedText, buildResumeText } = require('../services/embeddings');
+const { renderMarkdown, renderPlainText, renderDocx } = require('../services/resumeRender');
+
+// ------------------------------------------------------------
+// Apply a coach suggestion to a parsed-resume object.
+// Returns a NEW object (doesn't mutate the input) so we can compare
+// before/after if we ever want diffing later.
+// Unknown suggestion types are silently ignored — defensive against
+// the LLM occasionally going off-schema.
+// ------------------------------------------------------------
+function applySuggestion(parsedData, suggestion) {
+  const next = JSON.parse(JSON.stringify(parsedData || {}));
+  const text = (suggestion?.suggestedText || '').trim();
+  if (!text) return next;
+
+  switch (suggestion.type) {
+    case 'rewrite_summary':
+      next.summary = text;
+      break;
+
+    case 'rewrite_responsibilities': {
+      const i = suggestion.target?.experienceIndex;
+      if (Array.isArray(next.experience) && next.experience[i]) {
+        next.experience[i].responsibilities = text;
+      }
+      break;
+    }
+
+    case 'rewrite_skill': {
+      const i = suggestion.target?.skillIndex;
+      if (Array.isArray(next.skills) && next.skills[i] !== undefined) {
+        next.skills[i] = text;
+      }
+      break;
+    }
+
+    case 'add_skill':
+      next.skills = next.skills || [];
+      if (!next.skills.includes(text)) next.skills.push(text);
+      break;
+
+    case 'add_target_role':
+      next.recommendedJobTitles = next.recommendedJobTitles || [];
+      if (!next.recommendedJobTitles.includes(text)) next.recommendedJobTitles.push(text);
+      break;
+
+    case 'add_certification':
+      next.usEquivalents = next.usEquivalents || {};
+      next.usEquivalents.certifications = next.usEquivalents.certifications
+        ? `${next.usEquivalents.certifications}; ${text}`
+        : text;
+      break;
+  }
+  return next;
+}
 
 const router = express.Router();
 router.use(requireAuth);
@@ -256,6 +310,141 @@ router.delete('/:id', async (req, res) => {
   } catch (err) {
     console.error('Delete resume error:', err);
     res.status(500).json({ error: 'Failed to delete resume' });
+  }
+});
+
+// ------------------------------------------------------------
+// POST /api/resumes/:id/suggestions  → generate coach suggestions
+// ------------------------------------------------------------
+// Body: { language?: string, focus?: string }
+//   language defaults to the user's preferredLanguage (so rationales
+//   come back in their native tongue)
+//   focus is optional free-text the user typed to steer the coach
+//   ("emphasize leadership", "shorter bullets", etc.)
+router.post('/:id/suggestions', async (req, res) => {
+  try {
+    const resume = await findOwnedResume(req.params.id, req.user.id);
+    if (!resume) return res.status(404).json({ error: 'Resume not found' });
+
+    const { language, focus } = req.body || {};
+    let lang = language;
+    if (!lang) {
+      const user = await prisma.user.findUnique({
+        where: { id: req.user.id },
+        select: { preferredLanguage: true }
+      });
+      lang = user?.preferredLanguage || 'English';
+    }
+
+    const suggestions = await suggestResumeImprovements(resume.parsedData, lang, focus || null);
+    res.json({ suggestions });
+  } catch (err) {
+    console.error('Suggestions error:', err);
+    res.status(500).json({ error: err.message || 'Failed to generate suggestions' });
+  }
+});
+
+// ------------------------------------------------------------
+// POST /api/resumes/:id/apply-suggestion
+// ------------------------------------------------------------
+// Body: { suggestion: { type, target, suggestedText, ... } }
+// Mutates parsedData per the suggestion, persists it, and clears the
+// stored embedding so the next job search will recompute against the
+// improved resume (which is the whole point — see your score go up).
+router.post('/:id/apply-suggestion', async (req, res) => {
+  try {
+    const resume = await findOwnedResume(req.params.id, req.user.id);
+    if (!resume) return res.status(404).json({ error: 'Resume not found' });
+
+    const { suggestion } = req.body || {};
+    if (!suggestion || !suggestion.type) {
+      return res.status(400).json({ error: 'suggestion required' });
+    }
+
+    const newParsed = applySuggestion(resume.parsedData, suggestion);
+
+    const updated = await prisma.resume.update({
+      where: { id: resume.id },
+      data: {
+        parsedData: newParsed,
+        // Invalidate embedding — next /api/search-jobs call backfills it.
+        embedding: null,
+        // Keep candidateName in sync if the summary/name section moved
+        candidateName: newParsed.name || resume.candidateName
+      }
+    });
+    res.json({ resume: updated });
+  } catch (err) {
+    console.error('Apply suggestion error:', err);
+    res.status(500).json({ error: err.message || 'Failed to apply suggestion' });
+  }
+});
+
+// ------------------------------------------------------------
+// POST /api/resumes/:id/build  → produce US-tailored resume
+// ------------------------------------------------------------
+// Body: { template?: 'chronological'|'hybrid'|'skills_first',
+//         language?: string }
+// Response: { structured, markdown, plainText }
+//
+// The frontend keeps `structured` in state and posts it back to
+// /export-docx if the user clicks Download — that way we don't
+// burn another Gemini call just to render the same content as docx.
+router.post('/:id/build', async (req, res) => {
+  try {
+    const resume = await findOwnedResume(req.params.id, req.user.id);
+    if (!resume) return res.status(404).json({ error: 'Resume not found' });
+
+    const { template = 'hybrid', language } = req.body || {};
+    const validTemplates = ['chronological', 'hybrid', 'skills_first'];
+    if (!validTemplates.includes(template)) {
+      return res.status(400).json({ error: `template must be one of: ${validTemplates.join(', ')}` });
+    }
+
+    // Pull preferredLanguage + email from the user
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id },
+      select: { email: true, preferredLanguage: true }
+    });
+    const lang = language || user?.preferredLanguage || 'English';
+
+    const structured = await buildTailoredResume(
+      resume.parsedData, template, lang, user?.email
+    );
+    const markdown = renderMarkdown(structured);
+    const plainText = renderPlainText(structured);
+    res.json({ structured, markdown, plainText });
+  } catch (err) {
+    console.error('Build resume error:', err);
+    res.status(500).json({ error: err.message || 'Failed to build resume' });
+  }
+});
+
+// ------------------------------------------------------------
+// POST /api/resumes/:id/export-docx
+// ------------------------------------------------------------
+// Body: { structured }   ← the object returned by /build
+// Streams a .docx file as a download. Ownership-checked but we don't
+// re-run Gemini — the frontend already has the content from /build.
+router.post('/:id/export-docx', async (req, res) => {
+  try {
+    const resume = await findOwnedResume(req.params.id, req.user.id);
+    if (!resume) return res.status(404).json({ error: 'Resume not found' });
+
+    const { structured } = req.body || {};
+    if (!structured || typeof structured !== 'object') {
+      return res.status(400).json({ error: 'structured resume payload required' });
+    }
+
+    const buffer = await renderDocx(structured);
+    const safeName = (structured.name || 'resume').replace(/[^\w\- ]/g, '').replace(/\s+/g, '_');
+    res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+    res.setHeader('Content-Disposition', `attachment; filename="${safeName}.docx"`);
+    res.setHeader('Content-Length', buffer.length);
+    res.send(buffer);
+  } catch (err) {
+    console.error('Export docx error:', err);
+    res.status(500).json({ error: err.message || 'Failed to export .docx' });
   }
 });
 

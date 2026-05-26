@@ -12,6 +12,7 @@ import Login from './pages/Login';
 import Signup from './pages/Signup';
 import Resumes from './pages/Resumes';
 import Jobs from './pages/Jobs';
+import Editor from './pages/Editor';
 
 export default function App() {
   const [language, setLanguage] = useState('en');
@@ -61,6 +62,14 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <Jobs />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/editor"
+              element={
+                <ProtectedRoute>
+                  <Editor />
                 </ProtectedRoute>
               }
             />
