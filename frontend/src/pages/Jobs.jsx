@@ -155,7 +155,7 @@ export default function Jobs() {
     };
 
     // Reusable card wrapper class
-    const cardCls = "rounded-2xl p-5 transition-colors " +
+    const cardCls = "rounded-lg p-5 transition-colors " +
                     "bg-white border border-slate-200 hover:border-slate-300 " +
                     "dark:bg-slate-900 dark:border-slate-800 dark:hover:border-slate-700";
 
@@ -166,7 +166,7 @@ export default function Jobs() {
                 <p className="mt-1 text-slate-500 dark:text-slate-400">Saved bookmarks and applications you're tracking.</p>
             </div>
 
-            <div className="flex gap-2 mb-6 p-1.5 w-fit rounded-2xl
+            <div className="flex gap-2 mb-6 p-1.5 w-fit rounded-lg
                             bg-slate-100 border border-slate-200
                             dark:bg-slate-900 dark:border-slate-800">
                 {tabBtn('saved', 'Saved', Bookmark, savedJobs.length)}
@@ -174,7 +174,7 @@ export default function Jobs() {
             </div>
 
             {error && (
-                <div className="mb-4 p-3 rounded-xl text-sm
+                <div className="mb-4 p-3 rounded-md text-sm
                                 bg-red-50 border border-red-200 text-red-700
                                 dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-300">
                     {error}
@@ -183,14 +183,14 @@ export default function Jobs() {
 
             {tab === 'saved' && (
                 savedJobs.length === 0 ? (
-                    <div className="rounded-2xl p-12 text-center
+                    <div className="rounded-lg p-12 text-center
                                     bg-white border border-slate-200
                                     dark:bg-slate-900 dark:border-slate-800">
                         <Bookmark className="w-12 h-12 mx-auto mb-4 text-slate-300 dark:text-slate-600" />
                         <h2 className="text-xl font-semibold mb-2 text-slate-900 dark:text-white">No saved jobs yet</h2>
                         <p className="mb-6 text-slate-500 dark:text-slate-400">Click the heart on any job in your matches to save it for later.</p>
                         <Link to="/analyze"
-                              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold transition-colors
+                              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md font-semibold transition-colors
                                          bg-sky-600 hover:bg-sky-700 text-white
                                          dark:bg-sky-600 dark:hover:bg-sky-500">
                             <Search className="w-4 h-4" />
@@ -225,14 +225,14 @@ export default function Jobs() {
                                     )}
                                     <div className="flex flex-wrap gap-2">
                                         <a href={j.applyUrl} target="_blank" rel="noopener noreferrer"
-                                           className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-colors
+                                           className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors
                                                       bg-sky-600 hover:bg-sky-700 text-white
                                                       dark:bg-sky-600 dark:hover:bg-sky-500">
                                             View Job
                                             <ExternalLink className="w-3.5 h-3.5" />
                                         </a>
                                         {alreadyApplied ? (
-                                            <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border
+                                            <span className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium border
                                                              bg-emerald-100 text-emerald-700 border-emerald-300
                                                              dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/40">
                                                 <Check className="w-3.5 h-3.5" />
@@ -240,14 +240,14 @@ export default function Jobs() {
                                             </span>
                                         ) : (
                                             <button onClick={() => markAppliedFromSaved(j)} disabled={isBusy}
-                                                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-colors cursor-pointer disabled:opacity-50
+                                                    className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium border transition-colors cursor-pointer disabled:opacity-50
                                                                bg-white border-slate-300 text-slate-700 hover:bg-emerald-50 hover:border-emerald-400 hover:text-emerald-700
                                                                dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-emerald-500/15 dark:hover:border-emerald-500/40 dark:hover:text-emerald-300">
                                                 Mark applied
                                             </button>
                                         )}
                                         <button onClick={() => unsave(j.id)} disabled={isBusy}
-                                                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-colors cursor-pointer disabled:opacity-50 ml-auto
+                                                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium border transition-colors cursor-pointer disabled:opacity-50 ml-auto
                                                            bg-white border-slate-300 text-slate-700 hover:bg-pink-50 hover:border-pink-400 hover:text-pink-700
                                                            dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-pink-500/15 dark:hover:border-pink-500/40 dark:hover:text-pink-300"
                                                 title="Unsave">
@@ -264,14 +264,14 @@ export default function Jobs() {
 
             {tab === 'applications' && (
                 applications.length === 0 ? (
-                    <div className="rounded-2xl p-12 text-center
+                    <div className="rounded-lg p-12 text-center
                                     bg-white border border-slate-200
                                     dark:bg-slate-900 dark:border-slate-800">
                         <Briefcase className="w-12 h-12 mx-auto mb-4 text-slate-300 dark:text-slate-600" />
                         <h2 className="text-xl font-semibold mb-2 text-slate-900 dark:text-white">No applications tracked yet</h2>
                         <p className="mb-6 text-slate-500 dark:text-slate-400">When you apply to a job, click "Mark applied" to track its status here.</p>
                         <Link to="/analyze"
-                              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold transition-colors
+                              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md font-semibold transition-colors
                                          bg-sky-600 hover:bg-sky-700 text-white
                                          dark:bg-sky-600 dark:hover:bg-sky-500">
                             <Search className="w-4 h-4" />
@@ -314,7 +314,7 @@ export default function Jobs() {
                                                   }}
                                                   placeholder="Interview Tuesday, contacted recruiter, etc."
                                                   rows={2}
-                                                  className="w-full rounded-xl px-3 py-2 text-sm resize-y
+                                                  className="w-full rounded-md px-3 py-2 text-sm resize-y
                                                              bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400
                                                              dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500
                                                              focus:outline-none focus:ring-2 focus:ring-sky-500" />
@@ -326,14 +326,14 @@ export default function Jobs() {
 
                                     <div className="flex flex-wrap gap-2 mt-3">
                                         <a href={a.applyUrl} target="_blank" rel="noopener noreferrer"
-                                           className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium transition-colors
+                                           className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors
                                                       bg-sky-600 hover:bg-sky-700 text-white
                                                       dark:bg-sky-600 dark:hover:bg-sky-500">
                                             View Job
                                             <ExternalLink className="w-3.5 h-3.5" />
                                         </a>
                                         <button onClick={() => deleteApplication(a.id)} disabled={isBusy}
-                                                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-medium border transition-colors cursor-pointer disabled:opacity-50 ml-auto
+                                                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium border transition-colors cursor-pointer disabled:opacity-50 ml-auto
                                                            bg-white border-slate-300 text-slate-700 hover:bg-red-50 hover:border-red-400 hover:text-red-700
                                                            dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-red-500/15 dark:hover:border-red-500/40 dark:hover:text-red-300">
                                             <Trash2 className="w-3.5 h-3.5" />

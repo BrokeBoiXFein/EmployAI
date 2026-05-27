@@ -34,11 +34,11 @@ export default function Login() {
 
   return (
     <div className="max-w-md mx-auto px-4 mt-12">
-      <div className="rounded-2xl p-8
+      <div className="rounded-lg p-8
                       bg-white border border-slate-200 shadow-sm
                       dark:bg-slate-900 dark:border-slate-800 dark:shadow-none">
         <div className="flex flex-col items-center mb-6">
-          <div className="p-3 rounded-2xl mb-3
+          <div className="p-3 rounded-lg mb-3
                           bg-sky-600 dark:bg-sky-700">
             <LogIn className="w-6 h-6 text-white" />
           </div>
@@ -47,7 +47,7 @@ export default function Login() {
         </div>
 
         {error && (
-          <div className="mb-4 p-3 rounded-xl text-sm flex items-start gap-2
+          <div className="mb-4 p-3 rounded-md text-sm flex items-start gap-2
                           bg-red-50 border border-red-200 text-red-700
                           dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-300">
             <AlertCircle className="w-4 h-4 mt-0.5 flex-shrink-0" />
@@ -67,7 +67,7 @@ export default function Login() {
                 autoFocus
                 value={email}
                 onChange={(e) => { setEmail(e.target.value); if (error) clearError(); }}
-                className="w-full rounded-xl pl-10 pr-4 py-2.5
+                className="w-full rounded-md pl-10 pr-4 py-2.5
                            bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400
                            dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500
                            focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
@@ -86,7 +86,7 @@ export default function Login() {
                 required
                 value={password}
                 onChange={(e) => { setPassword(e.target.value); if (error) clearError(); }}
-                className="w-full rounded-xl pl-10 pr-4 py-2.5
+                className="w-full rounded-md pl-10 pr-4 py-2.5
                            bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400
                            dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500
                            focus:outline-none focus:ring-2 focus:ring-sky-500 focus:border-transparent"
@@ -98,7 +98,7 @@ export default function Login() {
           <button
             type="submit"
             disabled={submitting}
-            className="w-full font-semibold py-2.5 rounded-xl transition-colors cursor-pointer
+            className="w-full font-semibold py-2.5 rounded-md transition-colors cursor-pointer
                        bg-sky-600 hover:bg-sky-700 text-white
                        dark:bg-sky-600 dark:hover:bg-sky-500 dark:text-white
                        disabled:opacity-50 disabled:cursor-not-allowed"

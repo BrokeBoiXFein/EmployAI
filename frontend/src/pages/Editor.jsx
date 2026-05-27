@@ -49,7 +49,7 @@ const LANGUAGES = [
 
 // Shared input class used in both the coach and the builder
 const INPUT_CLS =
-    'w-full rounded-xl px-3 py-2 text-sm ' +
+    'w-full rounded-md px-3 py-2 text-sm ' +
     'bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400 ' +
     'dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder-slate-500 ' +
     'focus:outline-none focus:ring-2 focus:ring-sky-500';
@@ -57,7 +57,7 @@ const INPUT_CLS =
 const SELECT_CLS = INPUT_CLS + ' appearance-none cursor-pointer pl-3 pr-9';
 
 const CARD_CLS =
-    'rounded-2xl p-6 ' +
+    'rounded-lg p-6 ' +
     'bg-white border border-slate-200 ' +
     'dark:bg-slate-900 dark:border-slate-800';
 
@@ -206,7 +206,7 @@ export default function Editor() {
                 <h2 className="text-xl font-semibold mb-2 text-slate-900 dark:text-white">No resume to coach yet</h2>
                 <p className="mb-6 text-slate-500 dark:text-slate-400">Upload a resume first — the studio will help you improve it line by line.</p>
                 <Link to="/analyze"
-                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold transition-colors
+                      className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md font-semibold transition-colors
                                  bg-sky-600 hover:bg-sky-700 text-white
                                  dark:bg-sky-600 dark:hover:bg-sky-500">
                     Upload a resume
@@ -218,7 +218,7 @@ export default function Editor() {
     return (
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20">
             {/* Header bar */}
-            <div className="mb-6 flex flex-wrap items-center gap-3 px-4 py-3 rounded-2xl
+            <div className="mb-6 flex flex-wrap items-center gap-3 px-4 py-3 rounded-lg
                             bg-white border border-slate-200
                             dark:bg-slate-900 dark:border-slate-800">
                 <div className="flex items-center gap-2 text-sm shrink-0
@@ -236,14 +236,14 @@ export default function Editor() {
                     <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none" />
                 </div>
                 <Link to="/resumes"
-                      className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-xl transition-colors cursor-pointer shrink-0
+                      className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-md transition-colors cursor-pointer shrink-0
                                  text-slate-600 hover:text-slate-900 hover:bg-slate-100
                                  dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800">
                     <FolderOpen className="w-4 h-4" />
                     Manage
                 </Link>
                 <Link to="/analyze"
-                      className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-xl transition-colors cursor-pointer shrink-0
+                      className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-md transition-colors cursor-pointer shrink-0
                                  bg-sky-50 border border-sky-200 text-sky-700 hover:bg-sky-100
                                  dark:bg-sky-500/10 dark:border-sky-500/30 dark:text-sky-300 dark:hover:bg-sky-500/20"
                       title="Re-rank jobs against your updated resume">
@@ -251,7 +251,7 @@ export default function Editor() {
                     Re-rank jobs
                 </Link>
                 <button onClick={openBuilder}
-                        className="flex items-center gap-1.5 text-sm font-bold px-3.5 py-2 rounded-xl transition-colors cursor-pointer shrink-0
+                        className="flex items-center gap-1.5 text-sm font-bold px-3.5 py-2 rounded-md transition-colors cursor-pointer shrink-0
                                    bg-amber-500 hover:bg-amber-600 text-amber-950
                                    dark:bg-amber-500 dark:hover:bg-amber-400"
                         title="Generate a US-tailored version of this resume">
@@ -261,7 +261,7 @@ export default function Editor() {
             </div>
 
             {error && (
-                <div className="mb-4 p-3 rounded-xl text-sm
+                <div className="mb-4 p-3 rounded-md text-sm
                                 bg-red-50 border border-red-200 text-red-700
                                 dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-300">
                     {error}
@@ -311,7 +311,7 @@ export default function Editor() {
                     </div>
 
                     <button onClick={generate} disabled={suggesting || !activeResumeId}
-                            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold transition-colors cursor-pointer mb-4
+                            className="w-full flex items-center justify-center gap-2 py-2.5 rounded-md font-bold transition-colors cursor-pointer mb-4
                                        bg-amber-500 hover:bg-amber-600 text-amber-950
                                        dark:bg-amber-500 dark:hover:bg-amber-400
                                        disabled:opacity-50 disabled:cursor-not-allowed">
@@ -323,7 +323,7 @@ export default function Editor() {
                     </button>
 
                     {!suggesting && suggestions.length === 0 && (
-                        <div className="text-center py-10 rounded-xl border border-dashed
+                        <div className="text-center py-10 rounded-md border border-dashed
                                         bg-slate-50 border-slate-300
                                         dark:bg-slate-800/40 dark:border-slate-700">
                             <p className="text-sm text-slate-500 dark:text-slate-400">
@@ -338,7 +338,7 @@ export default function Editor() {
                             const isBusy = busyId === s.id;
                             return (
                                 <div key={s.id}
-                                     className="rounded-xl p-4
+                                     className="rounded-md p-4
                                                 bg-slate-50 border border-slate-200
                                                 dark:bg-slate-800/40 dark:border-slate-700">
                                     <div className="flex items-center gap-2 mb-2">
@@ -405,7 +405,7 @@ export default function Editor() {
             {builderOpen && (
                 <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
                      onClick={closeBuilder}>
-                    <div className="rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto
+                    <div className="rounded-lg shadow-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto
                                     bg-white border border-slate-200
                                     dark:bg-slate-900 dark:border-slate-800"
                          onClick={(e) => e.stopPropagation()}>
@@ -435,7 +435,7 @@ export default function Editor() {
                                         return (
                                             <button key={tmpl.value}
                                                     onClick={() => { setBuilderTemplate(tmpl.value); setBuildResult(null); }}
-                                                    className={`text-left p-3 rounded-xl border transition-colors cursor-pointer ${
+                                                    className={`text-left p-3 rounded-md border transition-colors cursor-pointer ${
                                                         active
                                                             ? 'bg-amber-50 border-amber-400 ring-2 ring-amber-200 dark:bg-amber-500/15 dark:border-amber-500/50 dark:ring-amber-500/30'
                                                             : 'bg-slate-50 border-slate-200 hover:border-slate-300 dark:bg-slate-800 dark:border-slate-700 dark:hover:border-slate-600'
@@ -466,7 +466,7 @@ export default function Editor() {
                             </div>
 
                             <button onClick={runBuild} disabled={building}
-                                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-xl font-bold transition-colors cursor-pointer
+                                    className="w-full flex items-center justify-center gap-2 py-2.5 rounded-md font-bold transition-colors cursor-pointer
                                                bg-amber-500 hover:bg-amber-600 text-amber-950
                                                dark:bg-amber-500 dark:hover:bg-amber-400
                                                disabled:opacity-50 disabled:cursor-not-allowed">
@@ -508,7 +508,7 @@ export default function Editor() {
                                         </div>
                                     </div>
                                     {/* The paper-look preview stays white in BOTH themes — it represents the actual document. */}
-                                    <div className="rounded-xl overflow-y-auto max-h-[60vh] bg-white shadow-inner border border-slate-200 dark:border-slate-700">
+                                    <div className="rounded-md overflow-y-auto max-h-[60vh] bg-white shadow-inner border border-slate-200 dark:border-slate-700">
                                         <BuiltResumePreview structured={buildResult.structured} />
                                     </div>
                                 </div>

@@ -11,7 +11,7 @@ const AnalysisResults = ({ analysis, t }) => {
 
     return (
         <div className="space-y-6">
-            <div className="rounded-2xl p-6 sm:p-8
+            <div className="rounded-lg p-6 sm:p-8
                             bg-white border border-slate-200
                             dark:bg-slate-900 dark:border-slate-800">
 
@@ -65,7 +65,7 @@ const AnalysisResults = ({ analysis, t }) => {
                         </div>
                         <div className="space-y-2">
                             {analysis.education?.map((edu, idx) => (
-                                <div key={idx} className="p-3 rounded-xl
+                                <div key={idx} className="p-3 rounded-md
                                                           bg-slate-50 border border-slate-200
                                                           dark:bg-slate-800/50 dark:border-slate-700">
                                     <p className="font-semibold text-slate-900 dark:text-white">{edu.degree}</p>
@@ -100,7 +100,7 @@ const AnalysisResults = ({ analysis, t }) => {
                 {/* Recommendations grid: US equivalents + Suggestions */}
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-8">
                     {analysis.usEquivalents && (
-                        <div className="p-5 rounded-2xl
+                        <div className="p-5 rounded-lg
                                         bg-sky-50 border border-sky-200
                                         dark:bg-sky-500/5 dark:border-sky-500/20">
                             <h3 className="text-base font-semibold mb-3 text-sky-700 dark:text-sky-400">{t.usEquivalents}</h3>
@@ -124,7 +124,7 @@ const AnalysisResults = ({ analysis, t }) => {
                     )}
 
                     {analysis.suggestionsForUS && (
-                        <div className="p-5 rounded-2xl
+                        <div className="p-5 rounded-lg
                                         bg-amber-50 border border-amber-200
                                         dark:bg-amber-500/5 dark:border-amber-500/20">
                             <div className="flex items-center gap-2 mb-3">
@@ -155,7 +155,7 @@ const AnalysisResults = ({ analysis, t }) => {
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2">
                         {analysis.recommendedJobTitles?.map((title, idx) => (
                             <div key={idx}
-                                 className="p-3 rounded-xl text-center font-bold text-sm
+                                 className="p-3 rounded-md text-center font-bold text-sm
                                             bg-sky-600 hover:bg-sky-700 text-white
                                             dark:bg-sky-600 dark:hover:bg-sky-500
                                             transition-colors cursor-default">

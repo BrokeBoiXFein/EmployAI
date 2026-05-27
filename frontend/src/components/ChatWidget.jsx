@@ -20,7 +20,7 @@ const ChatWidget = ({ chatOpen, setChatOpen, messages, inputMessage, setInputMes
 
             {chatOpen && (
                 <div className="fixed bottom-8 right-8 w-[400px] h-[600px] max-w-[calc(100vw-4rem)] max-h-[calc(100vh-4rem)] z-50
-                                rounded-2xl shadow-2xl flex flex-col overflow-hidden
+                                rounded-lg shadow-2xl flex flex-col overflow-hidden
                                 bg-white border border-slate-200
                                 dark:bg-slate-900 dark:border-slate-800">
                     {/* Header */}
@@ -47,7 +47,7 @@ const ChatWidget = ({ chatOpen, setChatOpen, messages, inputMessage, setInputMes
                                     bg-slate-50 dark:bg-slate-950">
                         {messages.map((msg, idx) => (
                             <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`max-w-[85%] p-3 rounded-2xl text-sm leading-relaxed
+                                <div className={`max-w-[85%] p-3 rounded-lg text-sm leading-relaxed
                                                 ${msg.role === 'user'
                                                   ? 'bg-sky-600 text-white rounded-tr-none dark:bg-sky-600'
                                                   : 'bg-white text-slate-800 rounded-tl-none border border-slate-200 dark:bg-slate-800 dark:text-slate-100 dark:border-slate-700'}`}>
@@ -57,7 +57,7 @@ const ChatWidget = ({ chatOpen, setChatOpen, messages, inputMessage, setInputMes
                         ))}
                         {chatLoading && (
                             <div className="flex justify-start">
-                                <div className="p-3 rounded-2xl rounded-tl-none
+                                <div className="p-3 rounded-lg rounded-tl-none
                                                 bg-white border border-slate-200
                                                 dark:bg-slate-800 dark:border-slate-700">
                                     <Loader2 className="w-4 h-4 animate-spin text-sky-600 dark:text-sky-400" />
@@ -77,12 +77,12 @@ const ChatWidget = ({ chatOpen, setChatOpen, messages, inputMessage, setInputMes
                                    onKeyDown={handleKeyPress}
                                    placeholder={t.chatPlaceholder}
                                    disabled={chatLoading}
-                                   className="flex-1 rounded-xl px-4 py-2.5 text-sm outline-none transition-colors
+                                   className="flex-1 rounded-md px-4 py-2.5 text-sm outline-none transition-colors
                                               bg-slate-100 border border-slate-200 text-slate-900 placeholder:text-slate-400
                                               dark:bg-slate-800 dark:border-slate-700 dark:text-white dark:placeholder:text-slate-500
                                               focus:ring-2 focus:ring-sky-500 focus:border-transparent" />
                             <button onClick={sendMessage} disabled={!inputMessage.trim() || chatLoading}
-                                    className={`p-2.5 rounded-xl transition-colors cursor-pointer
+                                    className={`p-2.5 rounded-md transition-colors cursor-pointer
                                                 ${!inputMessage.trim() || chatLoading
                                                   ? 'bg-slate-100 text-slate-400 dark:bg-slate-800 dark:text-slate-600 cursor-not-allowed'
                                                   : 'bg-sky-600 hover:bg-sky-700 text-white dark:bg-sky-600 dark:hover:bg-sky-500'}`}>

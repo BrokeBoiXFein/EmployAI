@@ -283,14 +283,14 @@ export default function Analyzer({ language, t }) {
         return (
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20">
                 {error && (
-                    <div className="max-w-3xl mx-auto mb-6 p-4 rounded-2xl text-center
+                    <div className="max-w-3xl mx-auto mb-6 p-4 rounded-lg text-center
                                     bg-red-50 border border-red-200 text-red-700
                                     dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-300">
                         {error}
                     </div>
                 )}
                 {focusText && (
-                    <div className="max-w-3xl mx-auto mb-6 flex items-center gap-3 px-4 py-3 rounded-2xl
+                    <div className="max-w-3xl mx-auto mb-6 flex items-center gap-3 px-4 py-3 rounded-lg
                                     bg-sky-50 border border-sky-200
                                     dark:bg-sky-500/10 dark:border-sky-500/30">
                         <Sparkles className="w-4 h-4 text-sky-700 dark:text-sky-400 shrink-0" />
@@ -397,7 +397,7 @@ export default function Analyzer({ language, t }) {
 
             {/* Intent chip */}
             {focusText && (
-                <div className="mb-4 flex items-center gap-3 px-4 py-3 rounded-2xl
+                <div className="mb-4 flex items-center gap-3 px-4 py-3 rounded-lg
                                 bg-sky-50 border border-sky-200
                                 dark:bg-sky-500/10 dark:border-sky-500/30">
                     <Sparkles className="w-4 h-4 text-sky-700 dark:text-sky-400 shrink-0" />
@@ -417,10 +417,10 @@ export default function Analyzer({ language, t }) {
 
             {/* Low-match banner */}
             {showLowMatchBanner && (
-                <div className="mb-4 flex items-start gap-3 p-4 rounded-2xl
+                <div className="mb-4 flex items-start gap-3 p-4 rounded-lg
                                 bg-amber-50 border border-amber-200
                                 dark:bg-amber-500/10 dark:border-amber-500/30">
-                    <div className="p-2 rounded-xl shrink-0
+                    <div className="p-2 rounded-md shrink-0
                                     bg-amber-100 text-amber-700
                                     dark:bg-amber-500/20 dark:text-amber-300">
                         <Lightbulb className="w-5 h-5" />
@@ -435,14 +435,14 @@ export default function Analyzer({ language, t }) {
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
                         <button onClick={() => askChatForHelp(topMatchPct)}
-                                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold transition-colors cursor-pointer
+                                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-bold transition-colors cursor-pointer
                                            bg-amber-500 hover:bg-amber-600 text-amber-950
                                            dark:bg-amber-500 dark:hover:bg-amber-400">
                             <MessageCircle className="w-4 h-4" />
                             Get tips
                         </button>
                         <button onClick={() => setBannerDismissed(true)}
-                                className="p-2 rounded-xl transition-colors cursor-pointer
+                                className="p-2 rounded-md transition-colors cursor-pointer
                                            text-amber-700 hover:bg-amber-100
                                            dark:text-amber-300 dark:hover:bg-amber-500/20"
                                 title="Dismiss">
@@ -453,7 +453,7 @@ export default function Analyzer({ language, t }) {
             )}
 
             {error && (
-                <div className="mb-4 p-4 rounded-2xl text-center
+                <div className="mb-4 p-4 rounded-lg text-center
                                 bg-red-50 border border-red-200 text-red-700
                                 dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-300">
                     {error}
@@ -506,7 +506,7 @@ export default function Analyzer({ language, t }) {
 
                     {/* Empty-filter state — nothing matches the user's filters */}
                     {!jobsLoading && jobs.length > 0 && visibleJobs.length === 0 && (
-                        <div className="text-center py-12 rounded-2xl border border-dashed
+                        <div className="text-center py-12 rounded-lg border border-dashed
                                         bg-slate-50 border-slate-300
                                         dark:bg-slate-800/40 dark:border-slate-700">
                             <p className="text-slate-600 dark:text-slate-300 mb-3">
@@ -547,7 +547,7 @@ function ResumeSidebar({ data }) {
     const sectionTitle = "text-xs uppercase tracking-widest font-bold mb-2 text-slate-500 dark:text-slate-500";
 
     return (
-        <aside className="rounded-2xl overflow-hidden lg:sticky lg:top-32 lg:self-start lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto
+        <aside className="rounded-lg overflow-hidden lg:sticky lg:top-32 lg:self-start lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto
                           bg-white border border-slate-200
                           dark:bg-slate-900 dark:border-slate-800">
             {/* Header */}

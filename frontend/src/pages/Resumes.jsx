@@ -87,7 +87,7 @@ export default function Resumes() {
           </p>
         </div>
         <Link to="/analyze"
-              className="flex items-center gap-2 px-4 py-2 rounded-xl font-semibold transition-colors
+              className="flex items-center gap-2 px-4 py-2 rounded-md font-semibold transition-colors
                          bg-sky-600 hover:bg-sky-700 text-white
                          dark:bg-sky-600 dark:hover:bg-sky-500">
           <Upload className="w-4 h-4" />
@@ -96,7 +96,7 @@ export default function Resumes() {
       </div>
 
       {error && (
-        <div className="mb-4 p-3 rounded-xl text-sm
+        <div className="mb-4 p-3 rounded-md text-sm
                         bg-red-50 border border-red-200 text-red-700
                         dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-300">
           {error}
@@ -104,7 +104,7 @@ export default function Resumes() {
       )}
 
       {resumes.length === 0 ? (
-        <div className="rounded-2xl p-12 text-center
+        <div className="rounded-lg p-12 text-center
                         bg-white border border-slate-200
                         dark:bg-slate-900 dark:border-slate-800">
           <FileText className="w-12 h-12 mx-auto mb-4 text-slate-300 dark:text-slate-600" />
@@ -113,7 +113,7 @@ export default function Resumes() {
             Upload your first resume on the Analyze page. The AI will translate, parse, and find matching jobs.
           </p>
           <Link to="/analyze"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl font-semibold transition-colors
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md font-semibold transition-colors
                            bg-sky-600 hover:bg-sky-700 text-white
                            dark:bg-sky-600 dark:hover:bg-sky-500">
             <Upload className="w-4 h-4" />
@@ -129,13 +129,13 @@ export default function Resumes() {
 
             return (
               <div key={r.id}
-                   className={`group rounded-2xl p-5 border transition-colors
+                   className={`group rounded-lg p-5 border transition-colors
                                bg-white dark:bg-slate-900
                                ${isActive
                                  ? 'border-sky-400 dark:border-sky-500/60'
                                  : 'border-slate-200 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700'}`}>
                 <div className="flex items-start gap-4">
-                  <div className={`p-2.5 rounded-xl shrink-0
+                  <div className={`p-2.5 rounded-md shrink-0
                                   ${isActive
                                     ? 'bg-sky-600 dark:bg-sky-600'
                                     : 'bg-slate-100 dark:bg-slate-800'}`}>
