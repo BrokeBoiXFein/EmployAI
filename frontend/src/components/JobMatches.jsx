@@ -2,6 +2,7 @@ import React from 'react';
 import {
     Loader2, Building, MapPin, DollarSign, ExternalLink, Heart, Check
 } from 'lucide-react';
+import { useLang } from '../store/lang';
 
 // Cosine similarity → UI bits. Light + dark color variants.
 // Toned down per design pass — no Sparkles icon, smaller dot, looks
@@ -23,7 +24,8 @@ const dotColor = (score) =>
   : score >= 0.40 ? 'bg-amber-500'
   :                 'bg-slate-400';
 
-const JobMatches = ({ jobs, loading, t, formatSalary, stripHtml, savedIds, appliedIds, onToggleSave, onMarkApplied }) => {
+const JobMatches = ({ jobs, loading, formatSalary, stripHtml, savedIds, appliedIds, onToggleSave, onMarkApplied }) => {
+    const t = useLang(s => s.t);
     // Loading state — small inline indicator instead of huge centered spinner
     if (loading && jobs.length === 0) {
         return (
@@ -81,7 +83,7 @@ const JobMatches = ({ jobs, loading, t, formatSalary, stripHtml, savedIds, appli
                                                     ? 'text-pink-600 hover:bg-pink-50 dark:text-pink-400 dark:hover:bg-pink-500/10'
                                                     : 'text-slate-400 hover:text-pink-600 hover:bg-pink-50 dark:text-slate-500 dark:hover:text-pink-300 dark:hover:bg-pink-500/10'
                                             }`}
-                                            title={isSaved ? 'Unsave' : 'Save for later'}>
+                                            title={isSaved ? t.jobUnsave : t.jobSave}>
                                         <Heart className={`w-4 h-4 ${isSaved ? 'fill-current' : ''}`} />
                                     </button>
                                 )}
@@ -137,17 +139,17 @@ const JobMatches = ({ jobs, loading, t, formatSalary, stripHtml, savedIds, appli
                                     <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-semibold border
                                                      bg-emerald-50 text-emerald-700 border-emerald-300
                                                      dark:bg-emerald-500/10 dark:text-emerald-300 dark:border-emerald-500/30"
-                                          title="You've marked this as applied">
+                                          title={t.jobApplied}>
                                         <Check className="w-3.5 h-3.5" />
-                                        Applied
+                                        {t.jobApplied}
                                     </span>
                                 ) : (
                                     <button onClick={() => onMarkApplied(job)}
                                             className="inline-flex items-center gap-1 px-3 py-1.5 rounded-md text-xs font-semibold border transition-colors cursor-pointer
                                                        border-slate-300 text-slate-700 hover:bg-emerald-50 hover:border-emerald-400 hover:text-emerald-700
                                                        dark:border-slate-700 dark:text-slate-300 dark:hover:bg-emerald-500/10 dark:hover:border-emerald-500/40 dark:hover:text-emerald-300"
-                                            title="Record that you applied to this job">
-                                        Mark applied
+                                            title={t.jobMarkApplied}>
+                                        {t.jobMarkApplied}
                                     </button>
                                 )
                             )}

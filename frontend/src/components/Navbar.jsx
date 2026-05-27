@@ -6,9 +6,9 @@ import {
 } from 'lucide-react';
 import { useAuth } from '../store/auth';
 import { useTheme } from '../store/theme';
+import { useLang } from '../store/lang';
 
-// Single source of truth for nav link classes — light + dark variants.
-// `isActive` is the React Router pseudo-state.
+// Translated nav-link class. `isActive` is the React Router pseudo-state.
 function navLinkCls({ isActive }) {
     if (isActive) {
         return 'flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-semibold transition-colors ' +
@@ -20,12 +20,15 @@ function navLinkCls({ isActive }) {
            'dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800';
 }
 
-const Navbar = ({ language, setLanguage }) => {
+const Navbar = () => {
     const user = useAuth(s => s.user);
     const loading = useAuth(s => s.loading);
     const logout = useAuth(s => s.logout);
     const theme = useTheme(s => s.theme);
     const toggleTheme = useTheme(s => s.toggle);
+    const lang = useLang(s => s.lang);
+    const setLang = useLang(s => s.setLang);
+    const t = useLang(s => s.t);
     const navigate = useNavigate();
 
     const handleLogout = () => { logout(); navigate('/'); };
@@ -33,11 +36,10 @@ const Navbar = ({ language, setLanguage }) => {
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 border-b
                         bg-white border-slate-200
-                        dark:bg-slate-900/95 dark:border-slate-800 dark:backdrop-blur-sm">
+                        dark:bg-slate-900 dark:border-slate-800">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div className="flex items-center justify-between h-16 gap-4">
 
-                    {/* Logo + nav links */}
                     <div className="flex items-center gap-6 min-w-0">
                         <NavLink to="/" className="flex items-center gap-2 shrink-0">
                             <span className="inline-flex h-9 w-9 items-center justify-center rounded-md
@@ -51,28 +53,27 @@ const Navbar = ({ language, setLanguage }) => {
                         <div className="hidden md:flex items-center gap-1">
                             <NavLink to="/" end className={navLinkCls}>
                                 <HomeIcon className="w-4 h-4" />
-                                Home
+                                {t.navHome}
                             </NavLink>
                             <NavLink to="/analyze" className={navLinkCls}>
                                 <Search className="w-4 h-4" />
-                                Analyze
+                                {t.navAnalyze}
                             </NavLink>
                             <NavLink to="/editor" className={navLinkCls}>
                                 <Wand2 className="w-4 h-4" />
-                                Studio
+                                {t.navStudio}
                             </NavLink>
                             <NavLink to="/resumes" className={navLinkCls}>
                                 <FileText className="w-4 h-4" />
-                                Resumes
+                                {t.navResumes}
                             </NavLink>
                             <NavLink to="/jobs" className={navLinkCls}>
                                 <Briefcase className="w-4 h-4" />
-                                Jobs
+                                {t.navJobs}
                             </NavLink>
                         </div>
                     </div>
 
-                    {/* Right side: language, theme toggle, auth */}
                     <div className="flex items-center gap-2 shrink-0">
                         {/* Language picker */}
                         <div className="hidden sm:flex items-center gap-1.5 rounded-md px-2 py-1.5
@@ -81,8 +82,8 @@ const Navbar = ({ language, setLanguage }) => {
                                         transition-colors">
                             <Languages className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                             <select
-                                value={language}
-                                onChange={(e) => setLanguage(e.target.value)}
+                                value={lang}
+                                onChange={(e) => setLang(e.target.value)}
                                 className="bg-transparent border-none outline-none cursor-pointer text-sm font-medium appearance-none pr-1 focus:ring-0"
                             >
                                 <option value="en" className="bg-white dark:bg-slate-900">English</option>
@@ -101,15 +102,12 @@ const Navbar = ({ language, setLanguage }) => {
                                        text-slate-600 hover:text-slate-900 hover:bg-slate-100
                                        dark:text-slate-400 dark:hover:text-amber-300 dark:hover:bg-slate-800
                                        transition-colors cursor-pointer"
-                            title={theme === 'dark' ? 'Switch to light mode' : 'Switch to dark mode'}
+                            title={theme === 'dark' ? t.navToggleLight : t.navToggleDark}
                             aria-label="Toggle theme"
                         >
-                            {theme === 'dark'
-                                ? <Sun className="w-5 h-5" />
-                                : <Moon className="w-5 h-5" />}
+                            {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
                         </button>
 
-                        {/* Auth controls */}
                         {!loading && (user ? (
                             <div className="flex items-center gap-2 pl-1 border-l border-slate-200 dark:border-slate-800 ml-1">
                                 <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-md
@@ -123,10 +121,10 @@ const Navbar = ({ language, setLanguage }) => {
                                                text-slate-600 hover:text-slate-900 hover:bg-slate-100
                                                dark:text-slate-400 dark:hover:text-white dark:hover:bg-slate-800
                                                transition-colors cursor-pointer"
-                                    title="Log out"
+                                    title={t.navLogOut}
                                 >
                                     <LogOut className="w-4 h-4" />
-                                    <span className="hidden sm:inline">Log out</span>
+                                    <span className="hidden sm:inline">{t.navLogOut}</span>
                                 </button>
                             </div>
                         ) : (
@@ -137,7 +135,7 @@ const Navbar = ({ language, setLanguage }) => {
                                                  dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800
                                                  transition-colors">
                                     <LogIn className="w-4 h-4" />
-                                    <span className="hidden sm:inline">Log in</span>
+                                    <span className="hidden sm:inline">{t.navLogIn}</span>
                                 </Link>
                                 <Link to="/signup"
                                       className="flex items-center gap-1.5 px-4 py-1.5 rounded-md text-sm font-bold
@@ -145,7 +143,7 @@ const Navbar = ({ language, setLanguage }) => {
                                                  dark:bg-green-500 dark:hover:bg-green-400 dark:text-slate-950
                                                  transition-colors">
                                     <UserPlus className="w-4 h-4" />
-                                    <span className="hidden sm:inline">Sign up</span>
+                                    <span className="hidden sm:inline">{t.navSignUp}</span>
                                 </Link>
                             </div>
                         ))}

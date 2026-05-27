@@ -22,21 +22,24 @@ import {
     Search, Languages, ArrowRight, FolderOpen, Wand2, Copy, FileDown
 } from 'lucide-react';
 import { api, API_URL, tokenStorage } from '../services/api';
+import { useLang } from '../store/lang';
 
-const TEMPLATES = [
-    { value: 'hybrid',        label: 'Hybrid',        desc: 'Skills-led + chronological — best for immigrants' },
-    { value: 'chronological', label: 'Chronological', desc: 'Classic US format — best for steady careers' },
-    { value: 'skills_first',  label: 'Skills-first',  desc: 'Functional — best for career changers / gaps' }
+// Templates / type-meta now build at render time so labels & descriptions
+// pick up the current translation bundle. Values stay English (backend enum).
+const useTemplates = (t) => [
+    { value: 'hybrid',        label: t.blTemplateHybrid,      desc: t.blTemplateHybridDesc },
+    { value: 'chronological', label: t.blTemplateChrono,      desc: t.blTemplateChronoDesc },
+    { value: 'skills_first',  label: t.blTemplateSkillsFirst, desc: t.blTemplateSkillsDesc }
 ];
 
-const TYPE_META = {
-    rewrite_summary:         { label: 'Summary',           verb: 'Rewrite' },
-    rewrite_responsibilities:{ label: 'Experience bullet', verb: 'Rewrite' },
-    rewrite_skill:           { label: 'Skill',             verb: 'Replace' },
-    add_skill:               { label: 'New skill',         verb: 'Add' },
-    add_target_role:         { label: 'Target role',       verb: 'Add' },
-    add_certification:       { label: 'Certification',     verb: 'Add' }
-};
+const useTypeMeta = (t) => ({
+    rewrite_summary:          { label: t.stTypeSummary,     verb: t.stVerbRewrite },
+    rewrite_responsibilities: { label: t.stTypeBullet,      verb: t.stVerbRewrite },
+    rewrite_skill:            { label: t.stTypeSkill,       verb: t.stVerbReplace },
+    add_skill:                { label: t.stTypeNewSkill,    verb: t.stVerbAdd },
+    add_target_role:          { label: t.stTypeTargetRole,  verb: t.stVerbAdd },
+    add_certification:        { label: t.stTypeCert,        verb: t.stVerbAdd }
+});
 
 const LANGUAGES = [
     { code: 'English',  label: 'English'  },
@@ -62,6 +65,9 @@ const CARD_CLS =
     'dark:bg-slate-900 dark:border-slate-800';
 
 export default function Editor() {
+    const t = useLang(s => s.t);
+    const TEMPLATES = useTemplates(t);
+    const TYPE_META = useTypeMeta(t);
     const [resumes, setResumes] = useState([]);
     const [activeResumeId, setActiveResumeId] = useState(null);
     const [loading, setLoading] = useState(true);
@@ -160,7 +166,7 @@ export default function Editor() {
             await navigator.clipboard.writeText(text);
             setCopiedKey(key);
             setTimeout(() => setCopiedKey(null), 1500);
-        } catch { setError('Copy failed — your browser may have blocked clipboard access'); }
+        } catch { setError(t.commonCopyBlocked); }
     };
 
     const downloadDocx = async () => {
@@ -194,7 +200,7 @@ export default function Editor() {
             <div className="flex flex-col items-center justify-center py-24
                             text-slate-500 dark:text-slate-400">
                 <Loader2 className="w-8 h-8 animate-spin mb-3" />
-                <p>Loading studio…</p>
+                <p>{t.stLoading}</p>
             </div>
         );
     }
@@ -203,13 +209,13 @@ export default function Editor() {
         return (
             <div className={`max-w-3xl mx-auto p-12 text-center ${CARD_CLS}`}>
                 <Wand2 className="w-12 h-12 mx-auto mb-4 text-slate-300 dark:text-slate-600" />
-                <h2 className="text-xl font-semibold mb-2 text-slate-900 dark:text-white">No resume to coach yet</h2>
-                <p className="mb-6 text-slate-500 dark:text-slate-400">Upload a resume first — the studio will help you improve it line by line.</p>
+                <h2 className="text-xl font-semibold mb-2 text-slate-900 dark:text-white">{t.stEmptyTitle}</h2>
+                <p className="mb-6 text-slate-500 dark:text-slate-400">{t.stEmptyDesc}</p>
                 <Link to="/analyze"
                       className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md font-semibold transition-colors
                                  bg-sky-600 hover:bg-sky-700 text-white
                                  dark:bg-sky-600 dark:hover:bg-sky-500">
-                    Upload a resume
+                    {t.stUploadResumeBtn}
                 </Link>
             </div>
         );
@@ -224,7 +230,7 @@ export default function Editor() {
                 <div className="flex items-center gap-2 text-sm shrink-0
                                 text-slate-600 dark:text-slate-400">
                     <FileText className="w-4 h-4 text-sky-700 dark:text-sky-400" />
-                    Editing:
+                    {t.stEditing}
                 </div>
                 <div className="relative flex-1 min-w-[200px]">
                     <select value={activeResumeId || ''} onChange={(e) => switchActive(e.target.value)}
@@ -240,23 +246,23 @@ export default function Editor() {
                                  text-slate-600 hover:text-slate-900 hover:bg-slate-100
                                  dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800">
                     <FolderOpen className="w-4 h-4" />
-                    Manage
+                    {t.stManage}
                 </Link>
                 <Link to="/analyze"
                       className="flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-md transition-colors cursor-pointer shrink-0
                                  bg-sky-50 border border-sky-200 text-sky-700 hover:bg-sky-100
                                  dark:bg-sky-500/10 dark:border-sky-500/30 dark:text-sky-300 dark:hover:bg-sky-500/20"
-                      title="Re-rank jobs against your updated resume">
+                      title={t.stReRankJobs}>
                     <Search className="w-4 h-4" />
-                    Re-rank jobs
+                    {t.stReRankJobs}
                 </Link>
                 <button onClick={openBuilder}
                         className="flex items-center gap-1.5 text-sm font-bold px-3.5 py-2 rounded-md transition-colors cursor-pointer shrink-0
                                    bg-amber-500 hover:bg-amber-600 text-amber-950
                                    dark:bg-amber-500 dark:hover:bg-amber-400"
-                        title="Generate a US-tailored version of this resume">
+                        title={t.stBuildUsResume}>
                     <Wand2 className="w-4 h-4" />
-                    Build US Resume
+                    {t.stBuildUsResume}
                 </button>
             </div>
 
@@ -273,7 +279,7 @@ export default function Editor() {
                 <div className={CARD_CLS}>
                     <h2 className="h-serif text-2xl font-medium mb-4 flex items-center gap-2 text-slate-900 dark:text-white">
                         <FileText className="w-5 h-5 text-sky-700 dark:text-sky-400" />
-                        Your resume
+                        {t.stYourResume}
                     </h2>
                     <ResumeView data={data} />
                 </div>
@@ -282,14 +288,14 @@ export default function Editor() {
                 <div className={CARD_CLS + ' lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto'}>
                     <h2 className="h-serif text-2xl font-medium mb-4 flex items-center gap-2 text-slate-900 dark:text-white">
                         <Sparkles className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                        AI Coach
+                        {t.stAiCoach}
                     </h2>
 
                     <div className="mb-3">
                         <label className="text-xs font-medium flex items-center gap-1.5 mb-1
                                           text-slate-500 dark:text-slate-400">
                             <Languages className="w-3.5 h-3.5" />
-                            Explain in
+                            {t.stExplainIn}
                         </label>
                         <div className="relative">
                             <select value={language} onChange={(e) => setLanguage(e.target.value)} className={SELECT_CLS}>
@@ -303,10 +309,10 @@ export default function Editor() {
 
                     <div className="mb-3">
                         <label className="text-xs font-medium mb-1 block text-slate-500 dark:text-slate-400">
-                            What should the coach focus on? <span className="text-slate-400 dark:text-slate-500">(optional)</span>
+                            {t.stFocusLabel} <span className="text-slate-400 dark:text-slate-500">{t.stFocusOptional}</span>
                         </label>
                         <input type="text" value={focus} onChange={(e) => setFocus(e.target.value)}
-                               placeholder="e.g. emphasize leadership, make bullets shorter"
+                               placeholder={t.stFocusPh}
                                className={INPUT_CLS} />
                     </div>
 
@@ -316,9 +322,9 @@ export default function Editor() {
                                        dark:bg-amber-500 dark:hover:bg-amber-400
                                        disabled:opacity-50 disabled:cursor-not-allowed">
                         {suggesting ? (
-                            <><Loader2 className="w-4 h-4 animate-spin" />Coaching…</>
+                            <><Loader2 className="w-4 h-4 animate-spin" />{t.stCoaching}</>
                         ) : (
-                            <><Lightbulb className="w-4 h-4" />{suggestions.length > 0 ? 'New suggestions' : 'Get suggestions'}</>
+                            <><Lightbulb className="w-4 h-4" />{suggestions.length > 0 ? t.stNewSuggestions : t.stGetSuggestions}</>
                         )}
                     </button>
 
@@ -327,14 +333,14 @@ export default function Editor() {
                                         bg-slate-50 border-slate-300
                                         dark:bg-slate-800/40 dark:border-slate-700">
                             <p className="text-sm text-slate-500 dark:text-slate-400">
-                                Click <span className="font-semibold text-amber-700 dark:text-amber-300">Get suggestions</span> to see specific ways to strengthen this resume.
+                                {t.stCoachEmptyA}<span className="font-semibold text-amber-700 dark:text-amber-300">{t.stGetSuggestions}</span>{t.stCoachEmptyB}
                             </p>
                         </div>
                     )}
 
                     <div className="space-y-3">
                         {suggestions.map(s => {
-                            const meta = TYPE_META[s.type] || { label: s.type, verb: 'Update' };
+                            const meta = TYPE_META[s.type] || { label: s.type, verb: t.stVerbRewrite };
                             const isBusy = busyId === s.id;
                             return (
                                 <div key={s.id}
@@ -351,7 +357,7 @@ export default function Editor() {
 
                                     {s.currentText && s.currentText !== '[empty]' && (
                                         <div className="mb-2">
-                                            <p className="text-xs mb-1 text-slate-500 dark:text-slate-500">Currently</p>
+                                            <p className="text-xs mb-1 text-slate-500 dark:text-slate-500">{t.stCurrently}</p>
                                             <p className="text-sm rounded-lg p-2.5 line-clamp-3
                                                           bg-white border border-slate-200 text-slate-700
                                                           dark:bg-slate-900 dark:border-slate-700 dark:text-slate-300">
@@ -362,7 +368,7 @@ export default function Editor() {
 
                                     <div className="mb-2 flex items-center gap-2">
                                         <ArrowRight className="w-4 h-4 text-amber-600 dark:text-amber-400/80 shrink-0" />
-                                        <p className="text-xs text-amber-700 dark:text-amber-300/80">Suggested</p>
+                                        <p className="text-xs text-amber-700 dark:text-amber-300/80">{t.stSuggested}</p>
                                     </div>
                                     <p className="text-sm rounded-lg p-2.5 mb-2
                                                   bg-amber-50 border border-amber-300 text-slate-900
@@ -416,7 +422,7 @@ export default function Editor() {
                                 <div className="p-1.5 rounded-lg bg-amber-100 dark:bg-amber-500/15">
                                     <Wand2 className="w-5 h-5 text-amber-700 dark:text-amber-300" />
                                 </div>
-                                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Build US Resume</h2>
+                                <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t.blTitle}</h2>
                             </div>
                             <button onClick={closeBuilder}
                                     className="p-2 rounded-lg transition-colors cursor-pointer
@@ -428,7 +434,7 @@ export default function Editor() {
 
                         <div className="p-6 space-y-5">
                             <div>
-                                <label className="text-xs font-medium mb-2 block text-slate-500 dark:text-slate-400">Template</label>
+                                <label className="text-xs font-medium mb-2 block text-slate-500 dark:text-slate-400">{t.blTemplate}</label>
                                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
                                     {TEMPLATES.map(tmpl => {
                                         const active = builderTemplate === tmpl.value;
@@ -451,7 +457,7 @@ export default function Editor() {
                             <div>
                                 <label className="text-xs font-medium mb-1 flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
                                     <Languages className="w-3.5 h-3.5" />
-                                    Output language
+                                    {t.blOutputLang}
                                 </label>
                                 <div className="relative">
                                     <select value={builderLanguage}
@@ -471,9 +477,9 @@ export default function Editor() {
                                                dark:bg-amber-500 dark:hover:bg-amber-400
                                                disabled:opacity-50 disabled:cursor-not-allowed">
                                 {building ? (
-                                    <><Loader2 className="w-4 h-4 animate-spin" />Building…</>
+                                    <><Loader2 className="w-4 h-4 animate-spin" />{t.blBuilding}</>
                                 ) : (
-                                    <><Wand2 className="w-4 h-4" />{buildResult ? 'Rebuild' : 'Generate US-tailored resume'}</>
+                                    <><Wand2 className="w-4 h-4" />{buildResult ? t.blRebuild : t.blGenerate}</>
                                 )}
                             </button>
 
@@ -481,7 +487,7 @@ export default function Editor() {
                                 <div className="border-t pt-5 space-y-3 border-slate-200 dark:border-slate-800">
                                     <div className="flex flex-wrap items-center gap-2">
                                         <p className="text-sm flex-1 min-w-[200px] text-slate-600 dark:text-slate-400">
-                                            Preview below. Copy as plain text for ATS / job sites, or download .docx for Word.
+                                            {t.blPreviewNote}
                                         </p>
                                         <div className="flex gap-2 flex-wrap">
                                             <button onClick={() => copyToClipboard(buildResult.plainText, 'text')}

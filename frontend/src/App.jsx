@@ -1,10 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
-import { translations } from './constants';
 import { useAuth } from './store/auth';
 import { useTheme } from './store/theme';
+import { useLang } from './store/lang';
 
-// Component Imports
 import Navbar from './components/Navbar';
 import Home from './components/Home';
 import Analyzer from './components/Analyzer';
@@ -16,70 +15,29 @@ import Jobs from './pages/Jobs';
 import Editor from './pages/Editor';
 
 export default function App() {
-  const [language, setLanguage] = useState('en');
-  const t = translations[language];
-  const init = useAuth(s => s.init);
+  const initAuth = useAuth(s => s.init);
   const initTheme = useTheme(s => s.init);
+  // Read the current language so we can set the document direction
+  // attribute (Arabic is the only RTL language we support today).
+  const lang = useLang(s => s.lang);
 
-  // On first mount: hydrate user from token + apply theme to DOM.
-  // The theme class is already set by the inline script in index.html
-  // (no-flash); this call just keeps the Zustand store in sync.
-  useEffect(() => { init(); initTheme(); }, [init, initTheme]);
+  useEffect(() => { initAuth(); initTheme(); }, [initAuth, initTheme]);
 
   return (
     <Router basename={import.meta.env.BASE_URL}>
-      <div className={`app-container min-h-screen pb-20`} dir={language === 'ar' ? 'rtl' : 'ltr'}>
-        <Navbar
-          language={language}
-          setLanguage={setLanguage}
-          translations={translations}
-        />
-
-        {/* The shared layout: just top-padding to clear the fixed Navbar.
-            Each page sets its own max-width and horizontal padding — Home
-            uses full-width sections, app pages use a centered container. */}
+      <div className="app-container min-h-screen pb-20" dir={lang === 'ar' ? 'rtl' : 'ltr'}>
+        <Navbar />
+        {/* Layout: just top-padding to clear the fixed Navbar.
+            Each page sets its own max-width and horizontal padding. */}
         <main className="pt-16">
           <Routes>
-            <Route path="/" element={<Home t={t} />} />
-            <Route path="/login" element={<Login />} />
-            <Route path="/signup" element={<Signup language={language} />} />
-            <Route
-              path="/analyze"
-              element={
-                <ProtectedRoute>
-                  <Analyzer
-                    language={language}
-                    t={t}
-                    translations={translations}
-                    setLanguage={setLanguage}
-                  />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/resumes"
-              element={
-                <ProtectedRoute>
-                  <Resumes />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/jobs"
-              element={
-                <ProtectedRoute>
-                  <Jobs />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/editor"
-              element={
-                <ProtectedRoute>
-                  <Editor />
-                </ProtectedRoute>
-              }
-            />
+            <Route path="/"        element={<Home />} />
+            <Route path="/login"   element={<Login />} />
+            <Route path="/signup"  element={<Signup />} />
+            <Route path="/analyze" element={<ProtectedRoute><Analyzer /></ProtectedRoute>} />
+            <Route path="/resumes" element={<ProtectedRoute><Resumes /></ProtectedRoute>} />
+            <Route path="/jobs"    element={<ProtectedRoute><Jobs /></ProtectedRoute>} />
+            <Route path="/editor"  element={<ProtectedRoute><Editor /></ProtectedRoute>} />
           </Routes>
         </main>
       </div>

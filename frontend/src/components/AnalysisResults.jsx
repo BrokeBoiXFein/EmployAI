@@ -1,12 +1,14 @@
 import React from 'react';
 import { CheckCircle, Lightbulb, Briefcase, GraduationCap, Award } from 'lucide-react';
+import { useLang } from '../store/lang';
 
 // Shared classes
 const SECTION_TITLE = "text-lg font-semibold text-slate-900 dark:text-white";
 const SECTION_ICON  = "w-5 h-5 text-sky-700 dark:text-sky-400";
 const SUBTITLE      = "text-xs uppercase tracking-wider font-bold text-sky-700 dark:text-sky-400";
 
-const AnalysisResults = ({ analysis, t }) => {
+const AnalysisResults = ({ analysis }) => {
+    const t = useLang(s => s.t);
     if (!analysis) return null;
 
     return (

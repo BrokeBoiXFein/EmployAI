@@ -1,7 +1,9 @@
 import React, { useRef, useEffect } from 'react';
 import { MessageCircle, Bot, X, Loader2, Send } from 'lucide-react';
+import { useLang } from '../store/lang';
 
-const ChatWidget = ({ chatOpen, setChatOpen, messages, inputMessage, setInputMessage, handleKeyPress, sendMessage, chatLoading, t }) => {
+const ChatWidget = ({ chatOpen, setChatOpen, messages, inputMessage, setInputMessage, handleKeyPress, sendMessage, chatLoading }) => {
+    const t = useLang(s => s.t);
     const messagesEndRef = useRef(null);
     useEffect(() => { messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' }); }, [messages]);
 
@@ -14,7 +16,7 @@ const ChatWidget = ({ chatOpen, setChatOpen, messages, inputMessage, setInputMes
                                    dark:bg-sky-600 dark:hover:bg-sky-500 dark:text-white
                                    shadow-lg dark:shadow-sky-500/20">
                     <MessageCircle className="w-5 h-5" />
-                    {t.chatTitle || 'Ask the coach'}
+                    {t.chatAskCoach}
                 </button>
             )}
 

@@ -1,7 +1,9 @@
 import React from 'react';
 import { Upload, FileText, Loader2 } from 'lucide-react';
+import { useLang } from '../store/lang';
 
-const ResumeUpload = ({ file, handleFileUpload, analyzeResume, loading, t }) => {
+const ResumeUpload = ({ file, handleFileUpload, analyzeResume, loading }) => {
+    const t = useLang(s => s.t);
     return (
         <div className="max-w-3xl mx-auto mb-10">
             <div className="rounded-lg p-6 sm:p-8 transition-colors group

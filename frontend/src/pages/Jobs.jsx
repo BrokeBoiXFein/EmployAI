@@ -15,21 +15,25 @@ import {
     DollarSign, Sparkles, Loader2, Check, StickyNote, Search
 } from 'lucide-react';
 import { api } from '../services/api';
+import { useLang } from '../store/lang';
 
-// Light + dark variants per status. Cls applied to the dropdown pill.
-const STATUS_OPTIONS = [
-    { value: 'APPLIED',      label: 'Applied',
-      cls: 'bg-sky-100 text-sky-700 border-sky-300 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-500/40' },
-    { value: 'INTERVIEWING', label: 'Interviewing',
-      cls: 'bg-purple-100 text-purple-700 border-purple-300 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-500/40' },
-    { value: 'OFFERED',      label: 'Offered',
-      cls: 'bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/40' },
-    { value: 'REJECTED',     label: 'Rejected',
-      cls: 'bg-red-100 text-red-700 border-red-300 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/40' },
-    { value: 'WITHDRAWN',    label: 'Withdrawn',
-      cls: 'bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-700/40 dark:text-slate-400 dark:border-slate-600' }
-];
-const statusOpt = (v) => STATUS_OPTIONS.find(s => s.value === v) || STATUS_OPTIONS[0];
+// Light + dark variants per status. Labels are translated at render time
+// using the t.jpStatus* keys; the value names stay English (DB enum).
+const STATUS_CLS = {
+    APPLIED:      'bg-sky-100 text-sky-700 border-sky-300 dark:bg-sky-500/15 dark:text-sky-300 dark:border-sky-500/40',
+    INTERVIEWING: 'bg-purple-100 text-purple-700 border-purple-300 dark:bg-purple-500/15 dark:text-purple-300 dark:border-purple-500/40',
+    OFFERED:      'bg-emerald-100 text-emerald-700 border-emerald-300 dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/40',
+    REJECTED:     'bg-red-100 text-red-700 border-red-300 dark:bg-red-500/15 dark:text-red-300 dark:border-red-500/40',
+    WITHDRAWN:    'bg-slate-100 text-slate-600 border-slate-300 dark:bg-slate-700/40 dark:text-slate-400 dark:border-slate-600'
+};
+const STATUS_VALUES = ['APPLIED', 'INTERVIEWING', 'OFFERED', 'REJECTED', 'WITHDRAWN'];
+const statusLabel = (t, v) => ({
+    APPLIED: t.jpStatusApplied,
+    INTERVIEWING: t.jpStatusInterviewing,
+    OFFERED: t.jpStatusOffered,
+    REJECTED: t.jpStatusRejected,
+    WITHDRAWN: t.jpStatusWithdrawn
+})[v] || v;
 
 const matchBadge = (score) => {
     if (typeof score !== 'number') return null;
@@ -50,6 +54,7 @@ const fmtSalary = (min, max) => {
 };
 
 export default function Jobs() {
+    const t = useLang(s => s.t);
     const [tab, setTab] = useState('saved');
     const [savedJobs, setSavedJobs] = useState([]);
     const [applications, setApplications] = useState([]);
@@ -113,7 +118,7 @@ export default function Jobs() {
     };
 
     const deleteApplication = async (id) => {
-        if (!confirm('Delete this application record?')) return;
+        if (!confirm(t.jpDeleteConfirm)) return;
         setBusyId(id);
         try {
             await api.del(`/api/applications/${id}`);
@@ -127,7 +132,7 @@ export default function Jobs() {
             <div className="flex flex-col items-center justify-center py-24
                             text-slate-500 dark:text-slate-400">
                 <Loader2 className="w-8 h-8 animate-spin mb-3" />
-                <p>Loading your jobs…</p>
+                <p>{t.jpLoading}</p>
             </div>
         );
     }
@@ -162,15 +167,15 @@ export default function Jobs() {
     return (
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20">
             <div className="mb-8">
-                <h1 className="h-serif text-4xl font-medium text-slate-900 dark:text-white">Your jobs</h1>
-                <p className="mt-1 text-slate-500 dark:text-slate-400">Saved bookmarks and applications you're tracking.</p>
+                <h1 className="h-serif text-4xl font-medium text-slate-900 dark:text-white">{t.jpTitle}</h1>
+                <p className="mt-1 text-slate-500 dark:text-slate-400">{t.jpSub}</p>
             </div>
 
             <div className="flex gap-2 mb-6 p-1.5 w-fit rounded-lg
                             bg-slate-100 border border-slate-200
                             dark:bg-slate-900 dark:border-slate-800">
-                {tabBtn('saved', 'Saved', Bookmark, savedJobs.length)}
-                {tabBtn('applications', 'Applications', Briefcase, applications.length)}
+                {tabBtn('saved', t.jpTabSaved, Bookmark, savedJobs.length)}
+                {tabBtn('applications', t.jpTabApps, Briefcase, applications.length)}
             </div>
 
             {error && (
@@ -187,14 +192,14 @@ export default function Jobs() {
                                     bg-white border border-slate-200
                                     dark:bg-slate-900 dark:border-slate-800">
                         <Bookmark className="w-12 h-12 mx-auto mb-4 text-slate-300 dark:text-slate-600" />
-                        <h2 className="text-xl font-semibold mb-2 text-slate-900 dark:text-white">No saved jobs yet</h2>
-                        <p className="mb-6 text-slate-500 dark:text-slate-400">Click the heart on any job in your matches to save it for later.</p>
+                        <h2 className="text-xl font-semibold mb-2 text-slate-900 dark:text-white">{t.jpEmptySaved}</h2>
+                        <p className="mb-6 text-slate-500 dark:text-slate-400">{t.jpEmptySavedDesc}</p>
                         <Link to="/analyze"
                               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md font-semibold transition-colors
                                          bg-sky-600 hover:bg-sky-700 text-white
                                          dark:bg-sky-600 dark:hover:bg-sky-500">
                             <Search className="w-4 h-4" />
-                            Find jobs
+                            {t.jpFindJobs}
                         </Link>
                     </div>
                 ) : (
@@ -228,7 +233,7 @@ export default function Jobs() {
                                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors
                                                       bg-sky-600 hover:bg-sky-700 text-white
                                                       dark:bg-sky-600 dark:hover:bg-sky-500">
-                                            View Job
+                                            {t.viewJob}
                                             <ExternalLink className="w-3.5 h-3.5" />
                                         </a>
                                         {alreadyApplied ? (
@@ -236,23 +241,23 @@ export default function Jobs() {
                                                              bg-emerald-100 text-emerald-700 border-emerald-300
                                                              dark:bg-emerald-500/15 dark:text-emerald-300 dark:border-emerald-500/40">
                                                 <Check className="w-3.5 h-3.5" />
-                                                Applied
+                                                {t.jobApplied}
                                             </span>
                                         ) : (
                                             <button onClick={() => markAppliedFromSaved(j)} disabled={isBusy}
                                                     className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium border transition-colors cursor-pointer disabled:opacity-50
                                                                bg-white border-slate-300 text-slate-700 hover:bg-emerald-50 hover:border-emerald-400 hover:text-emerald-700
                                                                dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-emerald-500/15 dark:hover:border-emerald-500/40 dark:hover:text-emerald-300">
-                                                Mark applied
+                                                {t.jobMarkApplied}
                                             </button>
                                         )}
                                         <button onClick={() => unsave(j.id)} disabled={isBusy}
                                                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium border transition-colors cursor-pointer disabled:opacity-50 ml-auto
                                                            bg-white border-slate-300 text-slate-700 hover:bg-pink-50 hover:border-pink-400 hover:text-pink-700
                                                            dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-pink-500/15 dark:hover:border-pink-500/40 dark:hover:text-pink-300"
-                                                title="Unsave">
+                                                title={t.jpUnsave}>
                                             <Heart className="w-3.5 h-3.5 fill-current" />
-                                            Unsave
+                                            {t.jpUnsave}
                                         </button>
                                     </div>
                                 </div>
@@ -268,20 +273,20 @@ export default function Jobs() {
                                     bg-white border border-slate-200
                                     dark:bg-slate-900 dark:border-slate-800">
                         <Briefcase className="w-12 h-12 mx-auto mb-4 text-slate-300 dark:text-slate-600" />
-                        <h2 className="text-xl font-semibold mb-2 text-slate-900 dark:text-white">No applications tracked yet</h2>
-                        <p className="mb-6 text-slate-500 dark:text-slate-400">When you apply to a job, click "Mark applied" to track its status here.</p>
+                        <h2 className="text-xl font-semibold mb-2 text-slate-900 dark:text-white">{t.jpEmptyApps}</h2>
+                        <p className="mb-6 text-slate-500 dark:text-slate-400">{t.jpEmptyAppsDesc}</p>
                         <Link to="/analyze"
                               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-md font-semibold transition-colors
                                          bg-sky-600 hover:bg-sky-700 text-white
                                          dark:bg-sky-600 dark:hover:bg-sky-500">
                             <Search className="w-4 h-4" />
-                            Find jobs
+                            {t.jpFindJobs}
                         </Link>
                     </div>
                 ) : (
                     <div className="grid gap-4">
                         {applications.map((a) => {
-                            const opt = statusOpt(a.status);
+                            const optCls = STATUS_CLS[a.status] || STATUS_CLS.APPLIED;
                             const isBusy = busyId === a.id;
                             return (
                                 <div key={a.id} className={cardCls}>
@@ -296,9 +301,9 @@ export default function Jobs() {
                                             )}
                                         </div>
                                         <select value={a.status} onChange={(e) => updateStatus(a.id, e.target.value)} disabled={isBusy}
-                                                className={`appearance-none cursor-pointer text-xs font-bold px-3 py-1.5 rounded-full border focus:outline-none focus:ring-2 focus:ring-sky-500 ${opt.cls}`}>
-                                            {STATUS_OPTIONS.map(s => (
-                                                <option key={s.value} value={s.value} className="bg-white text-slate-900 dark:bg-slate-900 dark:text-white">{s.label}</option>
+                                                className={`appearance-none cursor-pointer text-xs font-bold px-3 py-1.5 rounded-full border focus:outline-none focus:ring-2 focus:ring-sky-500 ${optCls}`}>
+                                            {STATUS_VALUES.map(v => (
+                                                <option key={v} value={v} className="bg-white text-slate-900 dark:bg-slate-900 dark:text-white">{statusLabel(t, v)}</option>
                                             ))}
                                         </select>
                                     </div>
@@ -306,13 +311,13 @@ export default function Jobs() {
                                     <div className="mt-3">
                                         <label className="flex items-center gap-1.5 text-xs font-medium mb-1 text-slate-500 dark:text-slate-400">
                                             <StickyNote className="w-3.5 h-3.5" />
-                                            Notes
+                                            {t.jpNotes}
                                         </label>
                                         <textarea defaultValue={a.notes || ''}
                                                   onBlur={(e) => {
                                                       if (e.target.value !== (a.notes || '')) updateNotes(a.id, e.target.value);
                                                   }}
-                                                  placeholder="Interview Tuesday, contacted recruiter, etc."
+                                                  placeholder={t.jpNotesPh}
                                                   rows={2}
                                                   className="w-full rounded-md px-3 py-2 text-sm resize-y
                                                              bg-slate-50 border border-slate-200 text-slate-900 placeholder-slate-400
@@ -321,7 +326,7 @@ export default function Jobs() {
                                     </div>
 
                                     <div className="flex flex-wrap gap-2 mt-3 text-xs text-slate-500 dark:text-slate-500">
-                                        <span>Applied {new Date(a.appliedAt).toLocaleDateString()}</span>
+                                        <span>{t.jpAppliedOn} {new Date(a.appliedAt).toLocaleDateString()}</span>
                                     </div>
 
                                     <div className="flex flex-wrap gap-2 mt-3">
@@ -329,7 +334,7 @@ export default function Jobs() {
                                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-md text-sm font-medium transition-colors
                                                       bg-sky-600 hover:bg-sky-700 text-white
                                                       dark:bg-sky-600 dark:hover:bg-sky-500">
-                                            View Job
+                                            {t.viewJob}
                                             <ExternalLink className="w-3.5 h-3.5" />
                                         </a>
                                         <button onClick={() => deleteApplication(a.id)} disabled={isBusy}
@@ -337,7 +342,7 @@ export default function Jobs() {
                                                            bg-white border-slate-300 text-slate-700 hover:bg-red-50 hover:border-red-400 hover:text-red-700
                                                            dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 dark:hover:bg-red-500/15 dark:hover:border-red-500/40 dark:hover:text-red-300">
                                             <Trash2 className="w-3.5 h-3.5" />
-                                            Delete
+                                            {t.jpDelete}
                                         </button>
                                     </div>
                                 </div>

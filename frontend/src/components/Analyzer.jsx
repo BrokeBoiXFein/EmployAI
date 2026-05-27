@@ -26,6 +26,7 @@ import ResumeUpload from './ResumeUpload';
 import JobMatches from './JobMatches';
 import ChatWidget from './ChatWidget';
 import { api } from '../services/api';
+import { useLang } from '../store/lang';
 
 const INTENT_KEY = 'employai_intent';
 
@@ -46,7 +47,9 @@ const formatSalary = (salary) => {
     return 'Not specified';
 };
 
-export default function Analyzer({ language, t }) {
+export default function Analyzer() {
+    const t = useLang(s => s.t);
+    const lang = useLang(s => s.lang);
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
@@ -295,10 +298,10 @@ export default function Analyzer({ language, t }) {
                                     dark:bg-sky-500/10 dark:border-sky-500/30">
                         <Sparkles className="w-4 h-4 text-sky-700 dark:text-sky-400 shrink-0" />
                         <div className="flex-1 text-sm min-w-0">
-                            <span className="font-semibold text-sky-900 dark:text-sky-200">We'll bias matches toward:</span>{' '}
+                            <span className="font-semibold text-sky-900 dark:text-sky-200">{t.anBiasingForward}</span>{' '}
                             <span className="text-sky-800 dark:text-sky-100 italic">"{focusText}"</span>
                         </div>
-                        <button onClick={clearIntent}
+                        <button onClick={clearIntent} title={t.anClearIntent}
                                 className="p-1.5 rounded-lg transition-colors cursor-pointer shrink-0
                                            text-sky-700 hover:bg-sky-100
                                            dark:text-sky-400 dark:hover:bg-sky-500/20">
@@ -307,11 +310,11 @@ export default function Analyzer({ language, t }) {
                     </div>
                 )}
                 <ResumeUpload file={file} handleFileUpload={handleFileUpload}
-                              analyzeResume={analyzeResume} loading={loading} t={t} />
+                              analyzeResume={analyzeResume} loading={loading} />
                 <ChatWidget chatOpen={chatOpen} setChatOpen={setChatOpen}
                             messages={messages} inputMessage={inputMessage}
                             setInputMessage={setInputMessage} handleKeyPress={handleKeyPress}
-                            sendMessage={sendMessage} chatLoading={chatLoading} t={t} />
+                            sendMessage={sendMessage} chatLoading={chatLoading} />
             </div>
         );
     }
@@ -337,7 +340,7 @@ export default function Analyzer({ language, t }) {
                 <div className="flex flex-wrap items-center gap-3">
                     {/* Active resume picker */}
                     <div className="flex items-center gap-2">
-                        <span className="text-xs uppercase tracking-widest font-bold text-slate-500 dark:text-slate-500">Active</span>
+                        <span className="text-xs uppercase tracking-widest font-bold text-slate-500 dark:text-slate-500">{t.anActive}</span>
                         <div className="relative">
                             <select value={activeResumeId || ''} onChange={(e) => switchActive(e.target.value)}
                                     className="appearance-none rounded-md pl-3 pr-9 py-2 text-sm font-medium cursor-pointer
@@ -357,14 +360,14 @@ export default function Analyzer({ language, t }) {
                     {/* Live stats — reflect what's currently visible after filters */}
                     <div className="hidden md:flex items-center gap-5 text-sm text-slate-600 dark:text-slate-400">
                         {topMatchPct !== null && (
-                            <span><span className={`font-bold ${topMatchCls}`}>{topMatchPct}%</span> top match</span>
+                            <span><span className={`font-bold ${topMatchCls}`}>{topMatchPct}%</span> {t.anTopMatch}</span>
                         )}
                         <span>
                             <span className="text-slate-900 dark:text-white font-bold">
                                 {activeFilterCount > 0 ? `${visibleJobs.length}/${jobs.length}` : jobs.length}
-                            </span>{' '}jobs
+                            </span>{' '}{t.anJobs}
                         </span>
-                        <span><span className="text-slate-900 dark:text-white font-bold">{savedIds.size}</span> saved</span>
+                        <span><span className="text-slate-900 dark:text-white font-bold">{savedIds.size}</span> {t.anSaved}</span>
                     </div>
 
                     <div className="flex-1"></div>
@@ -374,23 +377,23 @@ export default function Analyzer({ language, t }) {
                             className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-md transition-colors cursor-pointer
                                        text-slate-600 hover:text-slate-900 hover:bg-slate-100
                                        dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800"
-                            title="Upload another resume">
+                            title={t.anUploadNew}>
                         <Upload className="w-4 h-4" />
-                        Upload new
+                        {t.anUploadNew}
                     </button>
                     <button onClick={() => activeResumeId && searchJobs(activeResumeId)}
                             className="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-md transition-colors cursor-pointer
                                        text-sky-700 hover:text-sky-900 hover:bg-sky-50
                                        dark:text-sky-300 dark:hover:text-white dark:hover:bg-sky-500/15">
                         <RotateCcw className="w-4 h-4" />
-                        Re-run search
+                        {t.anReRun}
                     </button>
                     <Link to="/editor"
                           className="inline-flex items-center gap-1.5 text-sm font-bold px-3.5 py-2 rounded-md transition-colors cursor-pointer
                                      bg-amber-500 hover:bg-amber-600 text-amber-950
                                      dark:bg-amber-500 dark:hover:bg-amber-400">
                         <Wand2 className="w-4 h-4" />
-                        Improve in Studio
+                        {t.anImproveStudio}
                     </Link>
                 </div>
             </div>
@@ -402,14 +405,14 @@ export default function Analyzer({ language, t }) {
                                 dark:bg-sky-500/10 dark:border-sky-500/30">
                     <Sparkles className="w-4 h-4 text-sky-700 dark:text-sky-400 shrink-0" />
                     <div className="flex-1 text-sm min-w-0">
-                        <span className="font-semibold text-sky-900 dark:text-sky-200">Biasing matches toward:</span>{' '}
+                        <span className="font-semibold text-sky-900 dark:text-sky-200">{t.anBiasingToward}</span>{' '}
                         <span className="text-sky-800 dark:text-sky-100 italic">"{focusText}"</span>
                     </div>
                     <button onClick={clearIntent}
                             className="p-1.5 rounded-lg transition-colors cursor-pointer shrink-0
                                        text-sky-700 hover:bg-sky-100
                                        dark:text-sky-400 dark:hover:bg-sky-500/20"
-                            title="Clear intent and re-rank">
+                            title={t.anClearIntent}>
                         <X className="w-4 h-4" />
                     </button>
                 </div>
@@ -427,10 +430,10 @@ export default function Analyzer({ language, t }) {
                     </div>
                     <div className="flex-1 min-w-0">
                         <p className="font-semibold text-amber-900 dark:text-amber-100">
-                            Your top match is only {topMatchPct}%.
+                            {t.anLowMatchTitleA}{topMatchPct}{t.anLowMatchTitleB}
                         </p>
                         <p className="text-sm mt-0.5 text-amber-800 dark:text-amber-200/80">
-                            Want the AI assistant to suggest specific resume tweaks or alternative job titles?
+                            {t.anLowMatchSub}
                         </p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
@@ -439,13 +442,13 @@ export default function Analyzer({ language, t }) {
                                            bg-amber-500 hover:bg-amber-600 text-amber-950
                                            dark:bg-amber-500 dark:hover:bg-amber-400">
                             <MessageCircle className="w-4 h-4" />
-                            Get tips
+                            {t.anLowMatchGetTips}
                         </button>
                         <button onClick={() => setBannerDismissed(true)}
                                 className="p-2 rounded-md transition-colors cursor-pointer
                                            text-amber-700 hover:bg-amber-100
                                            dark:text-amber-300 dark:hover:bg-amber-500/20"
-                                title="Dismiss">
+                                title={t.anLowMatchDismiss}>
                             <X className="w-4 h-4" />
                         </button>
                     </div>
@@ -464,7 +467,7 @@ export default function Analyzer({ language, t }) {
             {showUpload && (
                 <div className="mb-6">
                     <ResumeUpload file={file} handleFileUpload={handleFileUpload}
-                                  analyzeResume={analyzeResume} loading={loading} t={t} />
+                                  analyzeResume={analyzeResume} loading={loading} />
                 </div>
             )}
 
@@ -542,6 +545,7 @@ export default function Analyzer({ language, t }) {
 // component, which was designed for a full-width display)
 // ============================================================
 function ResumeSidebar({ data }) {
+    const t = useLang(s => s.t);
     if (!data) return null;
 
     const sectionTitle = "text-xs uppercase tracking-widest font-bold mb-2 text-slate-500 dark:text-slate-500";
@@ -552,25 +556,25 @@ function ResumeSidebar({ data }) {
                           dark:bg-slate-900 dark:border-slate-800">
             {/* Header */}
             <div className="px-6 pt-6 pb-5 border-b border-slate-100 dark:border-slate-800">
-                <p className="text-xs uppercase tracking-widest font-bold mb-1 text-sky-700 dark:text-sky-400">Your profile</p>
+                <p className="text-xs uppercase tracking-widest font-bold mb-1 text-sky-700 dark:text-sky-400">{t.sbYourProfile}</p>
                 <h1 className="h-serif text-3xl font-medium leading-tight text-slate-900 dark:text-white">{data.name}</h1>
                 {data.originalLanguage && data.originalLanguage !== 'English' && (
                     <p className="text-sm mt-0.5 text-slate-500 dark:text-slate-500">
-                        Translated from <span className="font-medium text-slate-700 dark:text-slate-300">{data.originalLanguage}</span>
+                        {t.sbTranslatedFrom} <span className="font-medium text-slate-700 dark:text-slate-300">{data.originalLanguage}</span>
                     </p>
                 )}
             </div>
 
             {data.summary && (
                 <section className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
-                    <h2 className={sectionTitle}>Summary</h2>
+                    <h2 className={sectionTitle}>{t.sbSummary}</h2>
                     <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">{data.summary}</p>
                 </section>
             )}
 
             {Array.isArray(data.recommendedJobTitles) && data.recommendedJobTitles.length > 0 && (
                 <section className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
-                    <h2 className={sectionTitle}>Target roles</h2>
+                    <h2 className={sectionTitle}>{t.sbTargetRoles}</h2>
                     <div className="flex flex-wrap gap-1.5">
                         {data.recommendedJobTitles.map((r, i) => (
                             <span key={i} className="px-2.5 py-1 rounded-md text-xs font-bold border
@@ -585,7 +589,7 @@ function ResumeSidebar({ data }) {
 
             {Array.isArray(data.skills) && data.skills.length > 0 && (
                 <section className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
-                    <h2 className={sectionTitle}>Skills</h2>
+                    <h2 className={sectionTitle}>{t.sbSkills}</h2>
                     <div className="flex flex-wrap gap-1.5">
                         {data.skills.map((s, i) => (
                             <span key={i} className="px-2.5 py-1 rounded-md text-xs border
@@ -600,7 +604,7 @@ function ResumeSidebar({ data }) {
 
             {Array.isArray(data.experience) && data.experience.length > 0 && (
                 <section className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
-                    <h2 className={sectionTitle}>Experience</h2>
+                    <h2 className={sectionTitle}>{t.sbExperience}</h2>
                     <ol className="space-y-3">
                         {data.experience.slice(0, 5).map((e, i) => (
                             <li key={i} className="border-l-2 pl-3 border-sky-300 dark:border-sky-500/40">
@@ -617,7 +621,7 @@ function ResumeSidebar({ data }) {
 
             {Array.isArray(data.education) && data.education.length > 0 && (
                 <section className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
-                    <h2 className={sectionTitle}>Education</h2>
+                    <h2 className={sectionTitle}>{t.sbEducation}</h2>
                     <ul className="space-y-2">
                         {data.education.map((e, i) => (
                             <li key={i}>
@@ -631,12 +635,12 @@ function ResumeSidebar({ data }) {
 
             {data.usEquivalents && (data.usEquivalents.degreeEquivalent || data.usEquivalents.certifications) && (
                 <section className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
-                    <h2 className={sectionTitle}>US Equivalents</h2>
+                    <h2 className={sectionTitle}>{t.sbUsEquivalents}</h2>
                     {data.usEquivalents.degreeEquivalent && (
                         <div className="p-3 rounded-md mb-2
                                         bg-sky-50 border border-sky-200
                                         dark:bg-sky-500/10 dark:border-sky-500/30">
-                            <p className="text-xs uppercase tracking-widest font-bold mb-1 text-sky-700 dark:text-sky-400">Degree</p>
+                            <p className="text-xs uppercase tracking-widest font-bold mb-1 text-sky-700 dark:text-sky-400">{t.sbDegree}</p>
                             <p className="text-sm text-slate-900 dark:text-white">{data.usEquivalents.degreeEquivalent}</p>
                         </div>
                     )}
@@ -644,7 +648,7 @@ function ResumeSidebar({ data }) {
                         <div className="p-3 rounded-md
                                         bg-amber-50 border border-amber-200
                                         dark:bg-amber-500/10 dark:border-amber-500/30">
-                            <p className="text-xs uppercase tracking-widest font-bold mb-1 text-amber-700 dark:text-amber-400">Recommended certifications</p>
+                            <p className="text-xs uppercase tracking-widest font-bold mb-1 text-amber-700 dark:text-amber-400">{t.sbRecCerts}</p>
                             <p className="text-sm text-slate-900 dark:text-white">{data.usEquivalents.certifications}</p>
                         </div>
                     )}
@@ -656,7 +660,7 @@ function ResumeSidebar({ data }) {
                       className="inline-flex items-center gap-1.5 text-sm font-bold transition-colors cursor-pointer
                                  text-sky-700 hover:text-sky-900
                                  dark:text-sky-300 dark:hover:text-white">
-                    Improve this resume in the Studio
+                    {t.sbImproveStudio}
                     <ChevronDown className="w-4 h-4 -rotate-90" />
                 </Link>
             </div>
