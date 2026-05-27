@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>EmployAI</title>
+    <!--
+      Single-Page-Apps for GitHub Pages — MIT licensed
+      https://github.com/rafgraph/spa-github-pages
+
+      GitHub Pages serves THIS file whenever someone visits a path that isn't
+      a literal file (e.g. /EmployAI/analyze on a fresh load or a refresh).
+
+      The script below encodes that original path into the URL as a query
+      string, then redirects to the SPA's root (/EmployAI/). A matching
+      decoder in index.html unpacks it and tells React Router where to go.
+
+      Result: refresh and direct-link work, with clean URLs (no #hash).
+      pathSegmentsToKeep = 1 because our basename is /EmployAI/.
+    -->
+    <script type="text/javascript">
+      var pathSegmentsToKeep = 1;
+      var l = window.location;
+      l.replace(
+        l.protocol + '//' + l.hostname + (l.port ? ':' + l.port : '') +
+        l.pathname.split('/').slice(0, 1 + pathSegmentsToKeep).join('/') + '/?/' +
+        l.pathname.slice(1).split('/').slice(pathSegmentsToKeep).join('/').replace(/&/g, '~and~') +
+        (l.search ? '&' + l.search.slice(1).replace(/&/g, '~and~') : '') +
+        l.hash
+      );
+    </script>
+  </head>
+  <body></body>
+</html>
