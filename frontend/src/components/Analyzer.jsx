@@ -1,14 +1,32 @@
+// ============================================================
+// Analyzer — the /analyze workspace
+// ============================================================
+// Layout when a resume is active:
+//   ┌────────── Sticky toolbar (resume switcher + stats + actions) ──────────┐
+//   ├─ Intent chip ──────────────────────────────────────────────────────────┤
+//   ├─ Low-match banner (only if top score < 55%) ──────────────────────────┤
+//   │  ┌──────────────────────┬──────────────────────────────────────┐      │
+//   │  │ Resume profile       │ Matched jobs                          │      │
+//   │  │ (sticky 420px sidebar)│ - sort tabs                          │      │
+//   │  │                      │ - filter pills                       │      │
+//   │  │                      │ - JobMatches cards                   │      │
+//   │  └──────────────────────┴──────────────────────────────────────┘      │
+//   └─ Floating chat widget ────────────────────────────────────────────────┘
+//
+// When no active resume exists, we show the big ResumeUpload form instead.
+// ============================================================
+
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, ChevronDown, FolderOpen, Lightbulb, X, MessageCircle, Sparkles } from 'lucide-react';
+import {
+    FileText, ChevronDown, FolderOpen, Lightbulb, X, MessageCircle, Sparkles,
+    RotateCcw, Wand2, Upload, Filter, Plus
+} from 'lucide-react';
 import ResumeUpload from './ResumeUpload';
-import AnalysisResults from './AnalysisResults';
 import JobMatches from './JobMatches';
 import ChatWidget from './ChatWidget';
 import { api } from '../services/api';
 
-// Read what the user typed on the Home page (if anything) and stash here.
-// Keep in sync with Home.jsx's INTENT_KEY constant.
 const INTENT_KEY = 'employai_intent';
 
 const stripHtml = (html) => {
@@ -28,64 +46,47 @@ const formatSalary = (salary) => {
     return 'Not specified';
 };
 
-export default function Analyzer({ language, t, translations, setLanguage }) {
-    // Upload state
+export default function Analyzer({ language, t }) {
     const [file, setFile] = useState(null);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
 
-    // Resume library + active selection
     const [resumes, setResumes] = useState([]);
     const [activeResumeId, setActiveResumeId] = useState(null);
-
-    // Derived: the currently active resume object (or null)
     const activeResume = resumes.find(r => r.id === activeResumeId) || null;
     const analysis = activeResume?.parsedData || null;
 
-    // Jobs come from /api/search-jobs — depend on the active resume's titles
     const [jobs, setJobs] = useState([]);
     const [jobsLoading, setJobsLoading] = useState(false);
 
-    // Track which Adzuna job ids the user has saved or applied to, so the
-    // JobMatches cards can render the right state. Using Sets for O(1) lookup.
     const [savedIds, setSavedIds] = useState(() => new Set());
     const [appliedIds, setAppliedIds] = useState(() => new Set());
 
-    // The user's typed intent (from Home). If present, gets blended with
-    // the resume embedding server-side to bias the matches.
     const [focusText, setFocusText] = useState(() => {
         try { return localStorage.getItem(INTENT_KEY) || ''; } catch { return ''; }
     });
 
-    // Chat state
     const [chatOpen, setChatOpen] = useState(false);
     const [messages, setMessages] = useState([]);
     const [inputMessage, setInputMessage] = useState('');
     const [chatLoading, setChatLoading] = useState(false);
 
-    // "Low match" coach banner — shown when the top job match falls below
-    // our threshold. Dismissed per session so the user isn't nagged.
+    // When the user already has an active resume, the workspace is the
+    // primary view. Upload form is hidden by default, revealed via toggle.
+    const [showUpload, setShowUpload] = useState(false);
+
+    // Low-match banner dismissal — per session per resume
     const LOW_MATCH_THRESHOLD = 0.55;
     const [bannerDismissed, setBannerDismissed] = useState(false);
     const topScore = jobs[0]?.matchScore;
     const showLowMatchBanner = (
-        !bannerDismissed &&
-        !jobsLoading &&
-        jobs.length > 0 &&
-        typeof topScore === 'number' &&
-        topScore < LOW_MATCH_THRESHOLD
+        !bannerDismissed && !jobsLoading && jobs.length > 0 &&
+        typeof topScore === 'number' && topScore < LOW_MATCH_THRESHOLD
     );
 
-    // Reset dismissal whenever we run a new search — if their next resume
-    // also has low matches, we want to offer help again.
+    useEffect(() => { setMessages([{ role: 'assistant', content: t.chatWelcome }]); }, [language, t.chatWelcome]);
     useEffect(() => { setBannerDismissed(false); }, [activeResumeId]);
 
-    useEffect(() => {
-        setMessages([{ role: 'assistant', content: t.chatWelcome }]);
-    }, [language, t.chatWelcome]);
-
-    // On mount: load the user's resume library + saved/applied lists.
-    // Running in parallel — none of them depend on each other.
     useEffect(() => {
         (async () => {
             try {
@@ -98,113 +99,76 @@ export default function Analyzer({ language, t, translations, setLanguage }) {
                 setActiveResumeId(resumesRes.activeResumeId);
                 setSavedIds(new Set(savedRes.savedJobs.map(j => j.adzunaId)));
                 setAppliedIds(new Set(appsRes.applications.map(a => a.adzunaId)));
-
                 if (resumesRes.activeResumeId) await searchJobs(resumesRes.activeResumeId);
-            } catch (err) {
-                console.warn('Initial load failed:', err.message);
-            }
+            } catch (err) { console.warn('Initial load failed:', err.message); }
         })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
     }, []);
 
-    // ----- Save / Apply handlers ---------------------------------
-    // Optimistic UI: we update the Set first, then call the API. If
-    // the API fails, we revert. Feels instant to the user.
-
     const toggleSave = async (job) => {
         const id = String(job.id);
         const isSaved = savedIds.has(id);
-        // Optimistic toggle
-        setSavedIds(prev => {
-            const next = new Set(prev);
-            if (isSaved) next.delete(id); else next.add(id);
-            return next;
-        });
+        setSavedIds(prev => { const next = new Set(prev); if (isSaved) next.delete(id); else next.add(id); return next; });
         try {
             if (isSaved) {
                 await api.del(`/api/saved/by-adzuna/${id}`);
             } else {
                 await api.post('/api/saved', {
-                    adzunaId: id,
-                    title: job.title,
+                    adzunaId: id, title: job.title,
                     company: job.company?.display_name || null,
                     location: job.location?.display_name || null,
-                    salaryMin: job.salary_min ?? null,
-                    salaryMax: job.salary_max ?? null,
+                    salaryMin: job.salary_min ?? null, salaryMax: job.salary_max ?? null,
                     description: stripHtml(job.description).slice(0, 1000),
                     applyUrl: job.redirect_url,
                     matchScore: typeof job.matchScore === 'number' ? job.matchScore : null
                 });
             }
         } catch (err) {
-            // Revert on failure
             console.error('Save toggle error:', err);
-            setSavedIds(prev => {
-                const next = new Set(prev);
-                if (isSaved) next.add(id); else next.delete(id);
-                return next;
-            });
+            setSavedIds(prev => { const next = new Set(prev); if (isSaved) next.add(id); else next.delete(id); return next; });
         }
     };
 
     const markApplied = async (job) => {
         const id = String(job.id);
-        if (appliedIds.has(id)) return; // already applied — no-op
-        setAppliedIds(prev => new Set(prev).add(id)); // optimistic
+        if (appliedIds.has(id)) return;
+        setAppliedIds(prev => new Set(prev).add(id));
         try {
             await api.post('/api/applications', {
-                adzunaId: id,
-                title: job.title,
+                adzunaId: id, title: job.title,
                 company: job.company?.display_name || null,
                 applyUrl: job.redirect_url
             });
         } catch (err) {
             console.error('Mark applied error:', err);
-            setAppliedIds(prev => {
-                const next = new Set(prev);
-                next.delete(id);
-                return next;
-            });
+            setAppliedIds(prev => { const next = new Set(prev); next.delete(id); return next; });
         }
     };
 
-    const handleFileUpload = async (e) => {
+    const handleFileUpload = (e) => {
         const uploadedFile = e.target.files[0];
         if (!uploadedFile) return;
-        setFile(uploadedFile);
-        setError(null);
+        setFile(uploadedFile); setError(null);
     };
 
     const analyzeResume = async () => {
         if (!file) return;
-        setLoading(true);
-        setError(null);
+        setLoading(true); setError(null);
         try {
             const formData = new FormData();
-            formData.append('resume', file);
-            formData.append('language', t.languageName);
-
-            // POST to /api/resumes creates a new Resume row + returns analysis.
-            // If it's the user's first resume, it's auto-activated.
+            formData.append('resume', file); formData.append('language', t.languageName);
             const data = await api.postFormData('/api/resumes', formData);
-
-            // Add the new resume to the top of the list
             setResumes(prev => [data.resume, ...prev]);
-
-            // If it became the active one (only happens for the first upload OR
-            // if it returned activeResumeId), switch the display to it
             if (data.becameActive) {
                 setActiveResumeId(data.resume.id);
                 await searchJobs(data.resume.id);
             }
-
             setFile(null);
+            setShowUpload(false); // collapse upload form after successful analyze
         } catch (err) {
             console.error('Analysis error:', err);
             setError(err.message || 'Failed to analyze resume. Please try again.');
-        } finally {
-            setLoading(false);
-        }
+        } finally { setLoading(false); }
     };
 
     const switchActive = async (newId) => {
@@ -214,52 +178,34 @@ export default function Analyzer({ language, t, translations, setLanguage }) {
             setActiveResumeId(newId);
             setJobs([]);
             await searchJobs(newId);
-        } catch (err) {
-            console.error('Switch resume error:', err);
-            setError(err.message);
-        }
+        } catch (err) { console.error('Switch resume error:', err); setError(err.message); }
     };
 
-    // Backend: looks up resume by id, uses its embedding (optionally blended
-    // with the user's typed intent) to score & sort Adzuna jobs by semantic
-    // similarity. Returns jobs[].matchScore in [-1, 1].
     const searchJobs = async (resumeId, intentOverride) => {
         if (!resumeId) return;
         setJobsLoading(true);
         try {
-            // Allow explicit override (e.g. when clearing the chip) so we
-            // don't race the focusText state update.
             const focus = intentOverride !== undefined ? intentOverride : focusText;
             const data = await api.post('/api/search-jobs', {
-                resumeId,
-                focusText: focus || undefined
+                resumeId, focusText: focus || undefined
             });
             if (data.success) setJobs(data.jobs);
-        } catch (err) {
-            console.error('Job search error:', err);
-        } finally {
-            setJobsLoading(false);
-        }
+        } catch (err) { console.error('Job search error:', err); }
+        finally { setJobsLoading(false); }
     };
 
     const clearIntent = () => {
-        try { localStorage.removeItem(INTENT_KEY); } catch { /* ignore */ }
+        try { localStorage.removeItem(INTENT_KEY); } catch {}
         setFocusText('');
-        // Re-run search without the intent bias so the user sees the
-        // change immediately
         if (activeResumeId) searchJobs(activeResumeId, '');
     };
 
-    // Accepts an optional explicit text. When called without args, falls back
-    // to the input-field contents (default ChatWidget behavior). This lets
-    // the low-match banner trigger a sendMessage without typing through the input.
     const sendMessage = async (text) => {
         const userMessage = (typeof text === 'string' ? text : inputMessage).trim();
         if (!userMessage || chatLoading) return;
         setInputMessage('');
         setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
         setChatLoading(true);
-
         try {
             const userProfile = analysis ? {
                 name: analysis.name,
@@ -267,88 +213,146 @@ export default function Analyzer({ language, t, translations, setLanguage }) {
                 experience: (analysis.experience || []).map(e => e.title).join(', '),
                 recommendedJobs: (analysis.recommendedJobTitles || []).join(', ')
             } : null;
-
             const data = await api.post('/api/chat', {
                 messages: messages.concat([{ role: 'user', content: userMessage }]),
-                language: t.languageName,
-                userProfile
+                language: t.languageName, userProfile
             });
-
-            if (data.success) {
-                setMessages(prev => [...prev, { role: 'assistant', content: data.message }]);
-            } else {
-                throw new Error(data.error || 'Failed to get response');
-            }
+            if (data.success) setMessages(prev => [...prev, { role: 'assistant', content: data.message }]);
+            else throw new Error(data.error || 'Failed to get response');
         } catch (err) {
             console.error('Chat error:', err);
-            setMessages(prev => [...prev, {
-                role: 'assistant',
-                content: 'Sorry, I encountered an error. Please try again.'
-            }]);
-        } finally {
-            setChatLoading(false);
-        }
+            setMessages(prev => [...prev, { role: 'assistant', content: 'Sorry, I encountered an error. Please try again.' }]);
+        } finally { setChatLoading(false); }
     };
 
-    // Open the chat widget AND send a specific message. Used by the
-    // low-match banner — opens the widget first so the user sees the
-    // exchange happen, then fires the coaching prompt.
     const askChatForHelp = (pct) => {
         const topTitle = jobs[0]?.title ? ` (top match was "${jobs[0].title}")` : '';
-        const prompt =
-            `My best job match is only ${pct}%${topTitle}. What specific changes should I make ` +
-            `to my resume — and what alternative job titles should I consider — to find better-fitting jobs?`;
-        setChatOpen(true);
-        sendMessage(prompt);
-        setBannerDismissed(true); // hide the banner once they've engaged
+        const prompt = `My best job match is only ${pct}%${topTitle}. What specific changes should I make to my resume — and what alternative job titles should I consider — to find better-fitting jobs?`;
+        setChatOpen(true); sendMessage(prompt); setBannerDismissed(true);
     };
 
     const handleKeyPress = (e) => {
-        if (e.key === 'Enter' && !e.shiftKey) {
-            e.preventDefault();
-            sendMessage();
-        }
+        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
     };
 
+    // ============================================================
+    // Empty state — no resumes yet OR user hasn't uploaded
+    // ============================================================
+    if (!analysis) {
+        return (
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20">
+                {error && (
+                    <div className="max-w-3xl mx-auto mb-6 p-4 rounded-2xl text-center
+                                    bg-red-50 border border-red-200 text-red-700
+                                    dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-300">
+                        {error}
+                    </div>
+                )}
+                {focusText && (
+                    <div className="max-w-3xl mx-auto mb-6 flex items-center gap-3 px-4 py-3 rounded-2xl
+                                    bg-sky-50 border border-sky-200
+                                    dark:bg-sky-500/10 dark:border-sky-500/30">
+                        <Sparkles className="w-4 h-4 text-sky-700 dark:text-sky-400 shrink-0" />
+                        <div className="flex-1 text-sm min-w-0">
+                            <span className="font-semibold text-sky-900 dark:text-sky-200">We'll bias matches toward:</span>{' '}
+                            <span className="text-sky-800 dark:text-sky-100 italic">"{focusText}"</span>
+                        </div>
+                        <button onClick={clearIntent}
+                                className="p-1.5 rounded-lg transition-colors cursor-pointer shrink-0
+                                           text-sky-700 hover:bg-sky-100
+                                           dark:text-sky-400 dark:hover:bg-sky-500/20">
+                            <X className="w-4 h-4" />
+                        </button>
+                    </div>
+                )}
+                <ResumeUpload file={file} handleFileUpload={handleFileUpload}
+                              analyzeResume={analyzeResume} loading={loading} t={t} />
+                <ChatWidget chatOpen={chatOpen} setChatOpen={setChatOpen}
+                            messages={messages} inputMessage={inputMessage}
+                            setInputMessage={setInputMessage} handleKeyPress={handleKeyPress}
+                            sendMessage={sendMessage} chatLoading={chatLoading} t={t} />
+            </div>
+        );
+    }
+
+    // ============================================================
+    // Active workspace — sticky toolbar + sidebar + jobs grid
+    // ============================================================
+    const topMatchPct = typeof topScore === 'number' ? Math.max(0, Math.round(topScore * 100)) : null;
+    const topMatchCls =
+        topMatchPct === null ? 'text-slate-500'
+        : topMatchPct >= 70 ? 'text-emerald-700 dark:text-emerald-400'
+        : topMatchPct >= 55 ? 'text-sky-700 dark:text-sky-400'
+        : topMatchPct >= 40 ? 'text-amber-700 dark:text-amber-400'
+        :                     'text-slate-500';
+
     return (
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20">
-            {/* Switcher — only shown if the user has at least one resume */}
-            {resumes.length > 0 && (
-                <div className="max-w-3xl mx-auto mb-6 flex flex-wrap items-center gap-3 px-4 py-3 rounded-2xl
-                                bg-white border border-slate-200
-                                dark:bg-slate-900 dark:border-slate-800">
-                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                        <FileText className="w-4 h-4 text-sky-700 dark:text-sky-400" />
-                        Active resume:
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-6 pb-20">
+
+            {/* ===================== STICKY WORKSPACE TOOLBAR ===================== */}
+            <div className="sticky top-16 z-30 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 py-3 mb-5 border-b backdrop-blur-sm
+                            bg-white/95 border-slate-200
+                            dark:bg-slate-950/95 dark:border-slate-800">
+                <div className="flex flex-wrap items-center gap-3">
+                    {/* Active resume picker */}
+                    <div className="flex items-center gap-2">
+                        <span className="text-xs uppercase tracking-widest font-bold text-slate-500 dark:text-slate-500">Active</span>
+                        <div className="relative">
+                            <select value={activeResumeId || ''} onChange={(e) => switchActive(e.target.value)}
+                                    className="appearance-none rounded-md pl-3 pr-9 py-2 text-sm font-medium cursor-pointer
+                                               bg-slate-100 border border-slate-200 text-slate-900
+                                               dark:bg-slate-800 dark:border-slate-700 dark:text-white
+                                               focus:outline-none focus:ring-2 focus:ring-sky-500">
+                                {resumes.map(r => (
+                                    <option key={r.id} value={r.id} className="bg-white text-slate-900 dark:bg-slate-900 dark:text-white">{r.label}</option>
+                                ))}
+                            </select>
+                            <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none" />
+                        </div>
                     </div>
-                    <div className="relative flex-1 min-w-[180px]">
-                        <select value={activeResumeId || ''}
-                                onChange={(e) => switchActive(e.target.value)}
-                                className="w-full appearance-none rounded-xl pl-3 pr-9 py-2 text-sm cursor-pointer
-                                           bg-slate-50 border border-slate-200 text-slate-900
-                                           dark:bg-slate-800 dark:border-slate-700 dark:text-white
-                                           focus:outline-none focus:ring-2 focus:ring-sky-500">
-                            {!activeResumeId && <option value="">— pick a resume —</option>}
-                            {resumes.map(r => (
-                                <option key={r.id} value={r.id} className="bg-white text-slate-900 dark:bg-slate-900 dark:text-white">{r.label}</option>
-                            ))}
-                        </select>
-                        <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none" />
+
+                    <span className="hidden md:inline-block h-6 w-px bg-slate-200 dark:bg-slate-800"></span>
+
+                    {/* Live stats */}
+                    <div className="hidden md:flex items-center gap-5 text-sm text-slate-600 dark:text-slate-400">
+                        {topMatchPct !== null && (
+                            <span><span className={`font-bold ${topMatchCls}`}>{topMatchPct}%</span> top match</span>
+                        )}
+                        <span><span className="text-slate-900 dark:text-white font-bold">{jobs.length}</span> jobs</span>
+                        <span><span className="text-slate-900 dark:text-white font-bold">{savedIds.size}</span> saved</span>
                     </div>
-                    <Link to="/resumes"
-                          className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-xl transition-colors cursor-pointer
-                                     text-slate-600 hover:text-slate-900 hover:bg-slate-100
-                                     dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800">
-                        <FolderOpen className="w-4 h-4" />
-                        Manage
+
+                    <div className="flex-1"></div>
+
+                    {/* Actions */}
+                    <button onClick={() => setShowUpload(s => !s)}
+                            className="hidden sm:inline-flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-md transition-colors cursor-pointer
+                                       text-slate-600 hover:text-slate-900 hover:bg-slate-100
+                                       dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800"
+                            title="Upload another resume">
+                        <Upload className="w-4 h-4" />
+                        Upload new
+                    </button>
+                    <button onClick={() => activeResumeId && searchJobs(activeResumeId)}
+                            className="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-2 rounded-md transition-colors cursor-pointer
+                                       text-sky-700 hover:text-sky-900 hover:bg-sky-50
+                                       dark:text-sky-300 dark:hover:text-white dark:hover:bg-sky-500/15">
+                        <RotateCcw className="w-4 h-4" />
+                        Re-run search
+                    </button>
+                    <Link to="/editor"
+                          className="inline-flex items-center gap-1.5 text-sm font-bold px-3.5 py-2 rounded-md transition-colors cursor-pointer
+                                     bg-amber-500 hover:bg-amber-600 text-amber-950
+                                     dark:bg-amber-500 dark:hover:bg-amber-400">
+                        <Wand2 className="w-4 h-4" />
+                        Improve in Studio
                     </Link>
                 </div>
-            )}
+            </div>
 
-            {/* Intent chip — appears if the user typed something on Home.
-                Shows what we're biasing matches toward, with a dismiss button. */}
+            {/* Intent chip */}
             {focusText && (
-                <div className="max-w-3xl mx-auto mb-6 flex items-center gap-3 px-4 py-3 rounded-2xl
+                <div className="mb-4 flex items-center gap-3 px-4 py-3 rounded-2xl
                                 bg-sky-50 border border-sky-200
                                 dark:bg-sky-500/10 dark:border-sky-500/30">
                     <Sparkles className="w-4 h-4 text-sky-700 dark:text-sky-400 shrink-0" />
@@ -356,36 +360,19 @@ export default function Analyzer({ language, t, translations, setLanguage }) {
                         <span className="font-semibold text-sky-900 dark:text-sky-200">Biasing matches toward:</span>{' '}
                         <span className="text-sky-800 dark:text-sky-100 italic">"{focusText}"</span>
                     </div>
-                    <button
-                        onClick={clearIntent}
-                        className="p-1.5 rounded-lg text-sky-700 hover:text-sky-900 hover:bg-sky-100
-                                   dark:text-sky-400 dark:hover:text-white dark:hover:bg-sky-500/20
-                                   transition-colors cursor-pointer shrink-0"
-                        title="Clear intent and re-rank"
-                    >
+                    <button onClick={clearIntent}
+                            className="p-1.5 rounded-lg transition-colors cursor-pointer shrink-0
+                                       text-sky-700 hover:bg-sky-100
+                                       dark:text-sky-400 dark:hover:bg-sky-500/20"
+                            title="Clear intent and re-rank">
                         <X className="w-4 h-4" />
                     </button>
                 </div>
             )}
 
-            <ResumeUpload
-                file={file}
-                handleFileUpload={handleFileUpload}
-                analyzeResume={analyzeResume}
-                loading={loading}
-                t={t}
-            />
-
-            {error && (
-                <div className="max-w-3xl mx-auto mb-8 p-4 rounded-2xl text-center
-                                bg-red-50 border border-red-200 text-red-700
-                                dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-300">
-                    {error}
-                </div>
-            )}
-
+            {/* Low-match banner */}
             {showLowMatchBanner && (
-                <div className="max-w-5xl mx-auto mb-6 flex items-start gap-3 p-4 rounded-2xl
+                <div className="mb-4 flex items-start gap-3 p-4 rounded-2xl
                                 bg-amber-50 border border-amber-200
                                 dark:bg-amber-500/10 dark:border-amber-500/30">
                     <div className="p-2 rounded-xl shrink-0
@@ -395,14 +382,14 @@ export default function Analyzer({ language, t, translations, setLanguage }) {
                     </div>
                     <div className="flex-1 min-w-0">
                         <p className="font-semibold text-amber-900 dark:text-amber-100">
-                            Your top match is only {Math.max(0, Math.round(topScore * 100))}%.
+                            Your top match is only {topMatchPct}%.
                         </p>
                         <p className="text-sm mt-0.5 text-amber-800 dark:text-amber-200/80">
-                            Want the AI assistant to suggest specific resume tweaks or alternative job titles to explore?
+                            Want the AI assistant to suggest specific resume tweaks or alternative job titles?
                         </p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                        <button onClick={() => askChatForHelp(Math.max(0, Math.round(topScore * 100)))}
+                        <button onClick={() => askChatForHelp(topMatchPct)}
                                 className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold transition-colors cursor-pointer
                                            bg-amber-500 hover:bg-amber-600 text-amber-950
                                            dark:bg-amber-500 dark:hover:bg-amber-400">
@@ -411,8 +398,8 @@ export default function Analyzer({ language, t, translations, setLanguage }) {
                         </button>
                         <button onClick={() => setBannerDismissed(true)}
                                 className="p-2 rounded-xl transition-colors cursor-pointer
-                                           text-amber-700 hover:text-amber-900 hover:bg-amber-100
-                                           dark:text-amber-300 dark:hover:text-white dark:hover:bg-amber-500/20"
+                                           text-amber-700 hover:bg-amber-100
+                                           dark:text-amber-300 dark:hover:bg-amber-500/20"
                                 title="Dismiss">
                             <X className="w-4 h-4" />
                         </button>
@@ -420,34 +407,205 @@ export default function Analyzer({ language, t, translations, setLanguage }) {
                 </div>
             )}
 
-            {analysis && (
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-                    <AnalysisResults analysis={analysis} t={t} />
-                    <JobMatches
-                        jobs={jobs}
-                        loading={jobsLoading}
-                        t={t}
-                        formatSalary={formatSalary}
-                        stripHtml={stripHtml}
-                        savedIds={savedIds}
-                        appliedIds={appliedIds}
-                        onToggleSave={toggleSave}
-                        onMarkApplied={markApplied}
-                    />
+            {error && (
+                <div className="mb-4 p-4 rounded-2xl text-center
+                                bg-red-50 border border-red-200 text-red-700
+                                dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-300">
+                    {error}
                 </div>
             )}
 
-            <ChatWidget
-                chatOpen={chatOpen}
-                setChatOpen={setChatOpen}
-                messages={messages}
-                inputMessage={inputMessage}
-                setInputMessage={setInputMessage}
-                handleKeyPress={handleKeyPress}
-                sendMessage={sendMessage}
-                chatLoading={chatLoading}
-                t={t}
-            />
+            {/* Slide-out upload form when user clicks "Upload new" */}
+            {showUpload && (
+                <div className="mb-6">
+                    <ResumeUpload file={file} handleFileUpload={handleFileUpload}
+                                  analyzeResume={analyzeResume} loading={loading} t={t} />
+                </div>
+            )}
+
+            {/* ===================== TWO-COLUMN WORKSPACE ===================== */}
+            <div className="grid grid-cols-1 lg:grid-cols-[420px_minmax(0,1fr)] gap-6">
+                {/* LEFT: compact resume sidebar */}
+                <ResumeSidebar data={analysis} />
+
+                {/* RIGHT: jobs */}
+                <section>
+                    <div className="flex items-end justify-between mb-3 gap-3 flex-wrap">
+                        <h2 className="text-2xl font-bold text-slate-900 dark:text-white">Matched jobs</h2>
+                        <div className="hidden sm:flex items-center gap-1 text-xs p-1 rounded-lg
+                                        bg-slate-100 border border-slate-200
+                                        dark:bg-slate-900 dark:border-slate-800">
+                            <button className="px-2.5 py-1.5 rounded-md font-medium
+                                               bg-sky-600 text-white dark:bg-sky-600">Best match</button>
+                            <button className="px-2.5 py-1.5 rounded-md font-medium cursor-pointer
+                                               text-slate-600 hover:bg-white
+                                               dark:text-slate-400 dark:hover:bg-slate-800">Most recent</button>
+                            <button className="px-2.5 py-1.5 rounded-md font-medium cursor-pointer
+                                               text-slate-600 hover:bg-white
+                                               dark:text-slate-400 dark:hover:bg-slate-800">Highest pay</button>
+                        </div>
+                    </div>
+
+                    {/* Filter pills — visual only for now */}
+                    <div className="mb-4 flex flex-wrap items-center gap-2 text-xs">
+                        <span className="flex items-center gap-1.5 font-bold uppercase tracking-widest text-slate-500">
+                            <Filter className="w-3 h-3" /> Filters:
+                        </span>
+                        <button className="bg-white border border-slate-200 rounded-full px-3 py-1 transition-colors cursor-pointer
+                                           text-slate-600 hover:border-sky-400
+                                           dark:bg-slate-900 dark:border-slate-700 dark:text-slate-300 dark:hover:border-sky-500">Remote</button>
+                        <button className="bg-white border border-slate-200 rounded-full px-3 py-1 transition-colors cursor-pointer
+                                           text-slate-600 hover:border-sky-400
+                                           dark:bg-slate-900 dark:border-slate-700 dark:text-slate-300 dark:hover:border-sky-500">Full-time</button>
+                        <button className="bg-white border border-slate-200 rounded-full px-3 py-1 transition-colors cursor-pointer
+                                           text-slate-600 hover:border-sky-400
+                                           dark:bg-slate-900 dark:border-slate-700 dark:text-slate-300 dark:hover:border-sky-500">$100k+</button>
+                        <button className="inline-flex items-center gap-1 bg-white border border-slate-200 rounded-full px-3 py-1 transition-colors cursor-pointer
+                                           text-slate-600 hover:border-sky-400
+                                           dark:bg-slate-900 dark:border-slate-700 dark:text-slate-300 dark:hover:border-sky-500">
+                            <Plus className="w-3 h-3" /> Add filter
+                        </button>
+                    </div>
+
+                    <JobMatches jobs={jobs} loading={jobsLoading} t={t}
+                                formatSalary={formatSalary} stripHtml={stripHtml}
+                                savedIds={savedIds} appliedIds={appliedIds}
+                                onToggleSave={toggleSave} onMarkApplied={markApplied} />
+                </section>
+            </div>
+
+            <ChatWidget chatOpen={chatOpen} setChatOpen={setChatOpen}
+                        messages={messages} inputMessage={inputMessage}
+                        setInputMessage={setInputMessage} handleKeyPress={handleKeyPress}
+                        sendMessage={sendMessage} chatLoading={chatLoading} t={t} />
         </div>
+    );
+}
+
+// ============================================================
+// ResumeSidebar — compact left-pane view of the parsed resume
+// (intentionally tighter than the standalone AnalysisResults
+// component, which was designed for a full-width display)
+// ============================================================
+function ResumeSidebar({ data }) {
+    if (!data) return null;
+
+    const sectionTitle = "text-xs uppercase tracking-widest font-bold mb-2 text-slate-500 dark:text-slate-500";
+
+    return (
+        <aside className="rounded-2xl overflow-hidden lg:sticky lg:top-32 lg:self-start lg:max-h-[calc(100vh-9rem)] lg:overflow-y-auto
+                          bg-white border border-slate-200
+                          dark:bg-slate-900 dark:border-slate-800">
+            {/* Header */}
+            <div className="px-6 pt-6 pb-5 border-b border-slate-100 dark:border-slate-800">
+                <p className="text-xs uppercase tracking-widest font-bold mb-1 text-sky-700 dark:text-sky-400">Your profile</p>
+                <h1 className="text-2xl font-bold leading-tight text-slate-900 dark:text-white">{data.name}</h1>
+                {data.originalLanguage && data.originalLanguage !== 'English' && (
+                    <p className="text-sm mt-0.5 text-slate-500 dark:text-slate-500">
+                        Translated from <span className="font-medium text-slate-700 dark:text-slate-300">{data.originalLanguage}</span>
+                    </p>
+                )}
+            </div>
+
+            {data.summary && (
+                <section className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+                    <h2 className={sectionTitle}>Summary</h2>
+                    <p className="text-sm leading-relaxed text-slate-700 dark:text-slate-300">{data.summary}</p>
+                </section>
+            )}
+
+            {Array.isArray(data.recommendedJobTitles) && data.recommendedJobTitles.length > 0 && (
+                <section className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+                    <h2 className={sectionTitle}>Target roles</h2>
+                    <div className="flex flex-wrap gap-1.5">
+                        {data.recommendedJobTitles.map((r, i) => (
+                            <span key={i} className="px-2.5 py-1 rounded-md text-xs font-bold border
+                                                     bg-sky-50 border-sky-200 text-sky-700
+                                                     dark:bg-sky-500/10 dark:border-sky-500/30 dark:text-sky-300">
+                                {r}
+                            </span>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {Array.isArray(data.skills) && data.skills.length > 0 && (
+                <section className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+                    <h2 className={sectionTitle}>Skills</h2>
+                    <div className="flex flex-wrap gap-1.5">
+                        {data.skills.map((s, i) => (
+                            <span key={i} className="px-2.5 py-1 rounded-md text-xs border
+                                                     bg-slate-100 border-slate-200 text-slate-700
+                                                     dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200">
+                                {s}
+                            </span>
+                        ))}
+                    </div>
+                </section>
+            )}
+
+            {Array.isArray(data.experience) && data.experience.length > 0 && (
+                <section className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+                    <h2 className={sectionTitle}>Experience</h2>
+                    <ol className="space-y-3">
+                        {data.experience.slice(0, 5).map((e, i) => (
+                            <li key={i} className="border-l-2 pl-3 border-sky-300 dark:border-sky-500/40">
+                                <p className="text-sm font-bold text-slate-900 dark:text-white">{e.title}</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">{e.company} · {e.duration}</p>
+                                {e.responsibilities && (
+                                    <p className="text-xs mt-1 text-slate-600 dark:text-slate-300 line-clamp-3">{e.responsibilities}</p>
+                                )}
+                            </li>
+                        ))}
+                    </ol>
+                </section>
+            )}
+
+            {Array.isArray(data.education) && data.education.length > 0 && (
+                <section className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+                    <h2 className={sectionTitle}>Education</h2>
+                    <ul className="space-y-2">
+                        {data.education.map((e, i) => (
+                            <li key={i}>
+                                <p className="text-sm font-bold text-slate-900 dark:text-white">{e.degree}</p>
+                                <p className="text-xs text-slate-500 dark:text-slate-400">{e.institution} · {e.year}</p>
+                            </li>
+                        ))}
+                    </ul>
+                </section>
+            )}
+
+            {data.usEquivalents && (data.usEquivalents.degreeEquivalent || data.usEquivalents.certifications) && (
+                <section className="px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+                    <h2 className={sectionTitle}>US Equivalents</h2>
+                    {data.usEquivalents.degreeEquivalent && (
+                        <div className="p-3 rounded-md mb-2
+                                        bg-sky-50 border border-sky-200
+                                        dark:bg-sky-500/10 dark:border-sky-500/30">
+                            <p className="text-xs uppercase tracking-widest font-bold mb-1 text-sky-700 dark:text-sky-400">Degree</p>
+                            <p className="text-sm text-slate-900 dark:text-white">{data.usEquivalents.degreeEquivalent}</p>
+                        </div>
+                    )}
+                    {data.usEquivalents.certifications && (
+                        <div className="p-3 rounded-md
+                                        bg-amber-50 border border-amber-200
+                                        dark:bg-amber-500/10 dark:border-amber-500/30">
+                            <p className="text-xs uppercase tracking-widest font-bold mb-1 text-amber-700 dark:text-amber-400">Recommended certifications</p>
+                            <p className="text-sm text-slate-900 dark:text-white">{data.usEquivalents.certifications}</p>
+                        </div>
+                    )}
+                </section>
+            )}
+
+            <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/40">
+                <Link to="/editor"
+                      className="inline-flex items-center gap-1.5 text-sm font-bold transition-colors cursor-pointer
+                                 text-sky-700 hover:text-sky-900
+                                 dark:text-sky-300 dark:hover:text-white">
+                    Improve this resume in the Studio
+                    <ChevronDown className="w-4 h-4 -rotate-90" />
+                </Link>
+            </div>
+        </aside>
     );
 }
