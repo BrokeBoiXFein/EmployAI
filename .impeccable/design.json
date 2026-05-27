@@ -1,0 +1,172 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-05-27T00:00:00Z",
+  "title": "Design System: EmployAI",
+  "extensions": {
+    "colorMeta": {
+      "civic-sky": {
+        "role": "primary",
+        "displayName": "Civic Sky",
+        "canonical": "#0284c7",
+        "tonalRamp": ["#082f49", "#0c4a6e", "#075985", "#0369a1", "#0284c7", "#0ea5e9", "#38bdf8", "#bae6fd"]
+      },
+      "civic-sky-deep": {
+        "role": "primary",
+        "displayName": "Civic Sky Deep",
+        "canonical": "#0369a1",
+        "tonalRamp": ["#082f49", "#0c4a6e", "#075985", "#0369a1", "#0284c7", "#0ea5e9", "#38bdf8", "#bae6fd"]
+      },
+      "permit-green": {
+        "role": "secondary",
+        "displayName": "Permit Green",
+        "canonical": "#16a34a",
+        "tonalRamp": ["#052e16", "#14532d", "#166534", "#15803d", "#16a34a", "#22c55e", "#4ade80", "#bbf7d0"]
+      },
+      "caution-amber": {
+        "role": "tertiary",
+        "displayName": "Caution Amber",
+        "canonical": "#f59e0b",
+        "tonalRamp": ["#451a03", "#78350f", "#92400e", "#b45309", "#d97706", "#f59e0b", "#fbbf24", "#fde68a"]
+      },
+      "warning-red": {
+        "role": "system",
+        "displayName": "Warning Red",
+        "canonical": "#b91c1c",
+        "tonalRamp": ["#450a0a", "#7f1d1d", "#991b1b", "#b91c1c", "#dc2626", "#ef4444", "#f87171", "#fecaca"]
+      },
+      "surface-light": {
+        "role": "neutral",
+        "displayName": "Surface Light",
+        "canonical": "#f8fafc",
+        "tonalRamp": ["#020617", "#0f172a", "#1e293b", "#334155", "#64748b", "#94a3b8", "#cbd5e1", "#f8fafc"]
+      },
+      "surface-dark": {
+        "role": "neutral",
+        "displayName": "Surface Dark",
+        "canonical": "#020617",
+        "tonalRamp": ["#020617", "#0f172a", "#1e293b", "#334155", "#64748b", "#94a3b8", "#cbd5e1", "#f8fafc"]
+      }
+    },
+    "typographyMeta": {
+      "display": { "displayName": "Display", "purpose": "Home hero only. Serif gravity at marketing scale." },
+      "headline": { "displayName": "Headline", "purpose": "Section H2s on Home, page-level titles in the app." },
+      "title": { "displayName": "Title", "purpose": "Card titles, modal titles, step-card H3s." },
+      "body": { "displayName": "Body", "purpose": "All paragraph copy. Cap at 65-75ch." },
+      "label": { "displayName": "Eyebrow Label", "purpose": "Civic-Sky uppercase letter-spaced introducer above section titles." }
+    },
+    "shadows": [
+      { "name": "auth-card-lift", "value": "0 1px 2px 0 rgba(15, 23, 42, 0.05)", "purpose": "Single allowed shadow: the auth card in light mode only. Dark mode drops it." }
+    ],
+    "motion": [
+      { "name": "ease-color", "value": "150ms ease-out", "purpose": "Default for `transition-colors`. Hover, focus, active state changes. No translate, no scale." },
+      { "name": "float-decorative-LEGACY", "value": "6s ease-in-out infinite (`@keyframes float`)", "purpose": "Lingering decorative animation in index.css. Do not adopt in new work." }
+    ],
+    "breakpoints": [
+      { "name": "sm", "value": "640px" },
+      { "name": "md", "value": "768px" },
+      { "name": "lg", "value": "1024px" },
+      { "name": "xl", "value": "1280px" }
+    ]
+  },
+  "components": [
+    {
+      "name": "CTA Button (marketing)",
+      "kind": "button",
+      "refersTo": "button-cta",
+      "description": "Permit Green primary call-to-action used on Home and signup flows. Carries forward motion.",
+      "html": "<button class=\"ds-btn-cta\">Get started<svg width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><line x1=\"5\" y1=\"12\" x2=\"19\" y2=\"12\"/><polyline points=\"12 5 19 12 12 19\"/></svg></button>",
+      "css": ".ds-btn-cta { display: inline-flex; align-items: center; gap: 8px; background: #16a34a; color: #ffffff; font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 700; font-size: 1rem; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; transition: background-color 150ms ease-out; } .ds-btn-cta:hover { background: #15803d; } .ds-btn-cta:focus-visible { outline: 2px solid #0284c7; outline-offset: 2px; }"
+    },
+    {
+      "name": "Primary Button (in-app)",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "Civic Sky primary used in Login, Signup, and in-app primary actions.",
+      "html": "<button class=\"ds-btn-primary\">Log in</button>",
+      "css": ".ds-btn-primary { display: inline-flex; align-items: center; justify-content: center; background: #0284c7; color: #ffffff; font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif; font-weight: 600; font-size: 0.875rem; padding: 10px 16px; border: none; border-radius: 6px; cursor: pointer; transition: background-color 150ms ease-out; } .ds-btn-primary:hover { background: #0369a1; } .ds-btn-primary:focus-visible { outline: 2px solid #0284c7; outline-offset: 2px; } .ds-btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }"
+    },
+    {
+      "name": "Text Input with Icon",
+      "kind": "input",
+      "refersTo": "input-text",
+      "description": "Standard auth/search input. Icon absolute-positioned left, focus ring in Civic Sky.",
+      "html": "<label class=\"ds-input-wrap\"><svg class=\"ds-input-icon\" width=\"16\" height=\"16\" viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"2\" stroke-linecap=\"round\" stroke-linejoin=\"round\"><path d=\"M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z\"/><polyline points=\"22,6 12,13 2,6\"/></svg><input type=\"email\" placeholder=\"you@example.com\" class=\"ds-input\"/></label>",
+      "css": ".ds-input-wrap { position: relative; display: block; width: 100%; } .ds-input-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #94a3b8; pointer-events: none; } .ds-input { width: 100%; background: #f8fafc; color: #0f172a; font-family: 'Lato', -apple-system, BlinkMacSystemFont, sans-serif; font-size: 1rem; padding: 10px 16px 10px 40px; border: 1px solid #e2e8f0; border-radius: 6px; outline: none; transition: border-color 150ms ease-out, box-shadow 150ms ease-out; } .ds-input::placeholder { color: #94a3b8; } .ds-input:focus { border-color: transparent; box-shadow: 0 0 0 2px #0ea5e9; }"
+    },
+    {
+      "name": "Card (default)",
+      "kind": "card",
+      "refersTo": "card-default",
+      "description": "Flat white card with 1px Edge border. 8px radius. No shadow.",
+      "html": "<article class=\"ds-card\"><p class=\"ds-card-label\">FEATURED</p><h3 class=\"ds-card-title\">Resume parsed in 7 seconds</h3><p class=\"ds-card-body\">Upload in any language. We extract structured experience, skills, and credentials, then translate to your chosen UI language.</p></article>",
+      "css": ".ds-card { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; padding: 24px; color: #334155; } .ds-card-label { font-family: 'Lato', sans-serif; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: #0369a1; margin: 0 0 12px 0; } .ds-card-title { font-family: 'EB Garamond', Georgia, serif; font-weight: 500; font-size: 1.5rem; line-height: 1.25; letter-spacing: -0.01em; color: #0f172a; margin: 0 0 8px 0; } .ds-card-body { font-family: 'Lato', sans-serif; font-weight: 400; font-size: 1rem; line-height: 1.6; color: #334155; margin: 0; }"
+    },
+    {
+      "name": "Nav Item",
+      "kind": "nav",
+      "refersTo": "nav-item-active",
+      "description": "Top-bar navigation pill. Idle is muted slate; active is bold Civic Sky.",
+      "html": "<nav class=\"ds-nav\"><a href=\"#\" class=\"ds-nav-item ds-nav-item-active\">Analyze</a><a href=\"#\" class=\"ds-nav-item\">Studio</a><a href=\"#\" class=\"ds-nav-item\">Resumes</a><a href=\"#\" class=\"ds-nav-item\">Jobs</a></nav>",
+      "css": ".ds-nav { display: inline-flex; align-items: center; gap: 4px; padding: 8px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; } .ds-nav-item { display: inline-flex; align-items: center; gap: 8px; font-family: 'Lato', sans-serif; font-weight: 500; font-size: 0.875rem; color: #334155; padding: 6px 12px; border-radius: 6px; text-decoration: none; transition: background-color 150ms ease-out, color 150ms ease-out; } .ds-nav-item:hover { background: #f1f5f9; color: #0f172a; } .ds-nav-item-active, .ds-nav-item-active:hover { background: #0284c7; color: #ffffff; }"
+    },
+    {
+      "name": "Score Pill",
+      "kind": "chip",
+      "refersTo": "score-pill-high",
+      "description": "Signature component. Color carries truth: green high, sky mid, amber low. Never recolored upward.",
+      "html": "<div class=\"ds-pill-row\"><span class=\"ds-pill ds-pill-high\">82%</span><span class=\"ds-pill ds-pill-mid\">68%</span><span class=\"ds-pill ds-pill-low\">52%</span></div>",
+      "css": ".ds-pill-row { display: inline-flex; gap: 8px; } .ds-pill { display: inline-flex; align-items: center; font-family: 'Lato', sans-serif; font-weight: 700; font-size: 0.75rem; color: #ffffff; padding: 4px 10px; border-radius: 9999px; } .ds-pill-high { background: #16a34a; } .ds-pill-mid { background: #0284c7; } .ds-pill-low { background: #f59e0b; }"
+    },
+    {
+      "name": "Eyebrow Label",
+      "kind": "custom",
+      "refersTo": "label",
+      "description": "The signature typographic element. Civic Sky uppercase letter-spaced introducer; sits above every section title.",
+      "html": "<p class=\"ds-eyebrow\">How it works</p>",
+      "css": ".ds-eyebrow { font-family: 'Lato', sans-serif; font-weight: 700; font-size: 0.75rem; letter-spacing: 0.12em; text-transform: uppercase; color: #0369a1; margin: 0; }"
+    }
+  ],
+  "narrative": {
+    "northStar": "The Embassy Desk",
+    "overview": "EmployAI is the visual equivalent of a quiet, well-run embassy desk: a serious counter where someone helps you navigate a foreign system without making a scene of it. The whole interface carries that posture. Tight radii, civic colors, serif headings that lend gravity without ornament, sans-serif body that gets out of the way. The application surfaces and the marketing surface speak the same dialect. The system explicitly rejects the two reflexes that AI tools and for-immigrants products usually trip into: generic SaaS landing patterns and charity-coded interfaces. Users are professionals operating in unfamiliar infrastructure; the design treats them as such.",
+    "keyCharacteristics": [
+      "Serif-led display (EB Garamond), sans-led body (Lato)",
+      "Two-color identity: Civic Sky for trust, Permit Green for action",
+      "Tight radii, flat by default; 6px controls, 8px cards",
+      "Civic neutrals from the slate ramp",
+      "Full first-class dark mode",
+      "Six-language native, including RTL Arabic"
+    ],
+    "rules": [
+      { "name": "The Two-Voice Rule", "body": "Civic Sky and Permit Green are the only brand colors. Sky carries trust; Green carries action. A third brand color is wrong.", "section": "colors" },
+      { "name": "The Match Honesty Rule", "body": "Score pills color by truth. Green high, Sky mid, Amber low. Never recolor a low score upward.", "section": "colors" },
+      { "name": "The Drenched Final Section Rule", "body": "The closing CTA section on Home is the only drenched surface. Do not introduce a second.", "section": "colors" },
+      { "name": "The Serif-For-Headlines Rule", "body": "EB Garamond carries every Display, Headline, and Title. Lato never carries a headline.", "section": "typography" },
+      { "name": "The Eyebrow Rule", "body": "Sections are introduced by a Civic Sky uppercase label at letter-spacing 0.12em. Lowercase or tighter tracking is prohibited.", "section": "typography" },
+      { "name": "The Flat-By-Default Rule", "body": "Cards, panels, modals: 1px Edge border, no shadow. Fix the composition, not the elevation.", "section": "elevation" },
+      { "name": "The No-Glass Rule", "body": "The lingering .glass utility is forbidden in new work.", "section": "elevation" },
+      { "name": "The Tint Drift Rule", "body": "Cards currently use literal #ffffff and dark-mode headings use literal #ffffff. New near-white surfaces should tint toward Civic Sky.", "section": "colors" }
+    ],
+    "dos": [
+      "Do use .h-serif on every Display, Headline, and Title element. EB Garamond is half the identity.",
+      "Do carry Civic Sky for trust and presence; carry Permit Green for action and approval.",
+      "Do use 6px radius on controls and 8px on cards. No mixing radii within a single screen.",
+      "Do rely on a single 1px Edge border for depth. Light: #e2e8f0. Dark: #1e293b.",
+      "Do introduce sections with a Civic Sky uppercase eyebrow at letter-spacing 0.12em, followed by a serif headline.",
+      "Do color score pills by truth: Green high, Sky mid, Amber low. Show the real number.",
+      "Do design every component in both light and dark themes from the start.",
+      "Do treat layout direction (LTR / RTL) as structural. Use logical properties and mirror directional icons."
+    ],
+    "donts": [
+      "Don't ship a generic SaaS landing page: gradient hero, big-metric block, trusted-by-logos strip, three-identical-feature-cards grid.",
+      "Don't use charity / NGO tropes: stock smiling-faces photography, warm 'we believe in you' copy, recipient-coded visual language.",
+      "Don't use the .glass utility class. Glassmorphism is a banned aesthetic.",
+      "Don't use the legacy --primary: #4f46e5 indigo variable. Reference Tailwind sky-* utilities directly.",
+      "Don't introduce a third brand color. Sky and Green are the brand; Amber is functional.",
+      "Don't use gradient text, side-stripe borders, identical card grids, hero-metric templates, or modals as a first thought.",
+      "Don't use em dashes in UI copy. Comma, colon, semicolon, period, or parentheses.",
+      "Don't add shadows to lift a surface that doesn't need lifting. The system is flat.",
+      "Don't use rounded-2xl or larger outside the Home page hero card. Tight radii are part of the civic-tool feel."
+    ]
+  }
+}
