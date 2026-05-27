@@ -128,7 +128,7 @@ export default function Analyzer() {
         typeof topScore === 'number' && topScore < LOW_MATCH_THRESHOLD
     );
 
-    useEffect(() => { setMessages([{ role: 'assistant', content: t.chatWelcome }]); }, [language, t.chatWelcome]);
+    useEffect(() => { setMessages([{ role: 'assistant', content: t.chatWelcome }]); }, [lang, t.chatWelcome]);
     useEffect(() => { setBannerDismissed(false); }, [activeResumeId]);
 
     useEffect(() => {
