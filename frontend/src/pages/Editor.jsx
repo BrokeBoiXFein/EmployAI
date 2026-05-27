@@ -271,7 +271,7 @@ export default function Editor() {
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 {/* LEFT — resume preview */}
                 <div className={CARD_CLS}>
-                    <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-900 dark:text-white">
+                    <h2 className="h-serif text-2xl font-medium mb-4 flex items-center gap-2 text-slate-900 dark:text-white">
                         <FileText className="w-5 h-5 text-sky-700 dark:text-sky-400" />
                         Your resume
                     </h2>
@@ -280,7 +280,7 @@ export default function Editor() {
 
                 {/* RIGHT — AI Coach */}
                 <div className={CARD_CLS + ' lg:sticky lg:top-24 lg:self-start lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto'}>
-                    <h2 className="text-lg font-semibold mb-4 flex items-center gap-2 text-slate-900 dark:text-white">
+                    <h2 className="h-serif text-2xl font-medium mb-4 flex items-center gap-2 text-slate-900 dark:text-white">
                         <Sparkles className="w-5 h-5 text-amber-600 dark:text-amber-400" />
                         AI Coach
                     </h2>

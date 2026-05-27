@@ -19,11 +19,9 @@ import { useAuth } from '../store/auth';
 // after signup/login. Matches the constant the Analyzer reads from.
 const INTENT_KEY = 'employai_intent';
 
-// Shared font-family hack — EB Garamond for serif headings, Lato everywhere else.
-// Tailwind v4 doesn't expose font-* utilities from CSS-only config, so we use
-// inline style for the few places we want the serif font.
-const SERIF = { fontFamily: '"EB Garamond", Georgia, serif', letterSpacing: '-0.01em' };
-const SANS  = { fontFamily: 'Lato, system-ui, sans-serif' };
+// Body font (Lato) is now applied globally via index.css. The h-serif
+// utility class (also from index.css) supplies EB Garamond for the
+// distinctive editorial headings.
 
 const Home = () => {
     const user = useAuth(s => s.user);
@@ -48,8 +46,7 @@ const Home = () => {
     };
 
     return (
-        // Override the inherited Inter body font for this whole page.
-        <div style={SANS} className="text-slate-800 dark:text-slate-200">
+        <div className="text-slate-800 dark:text-slate-200">
 
             {/* ============================== HERO ============================== */}
             <section className="relative overflow-hidden
@@ -72,7 +69,7 @@ const Home = () => {
                         Built for immigrants · Works in 6 languages
                     </span>
 
-                    <h1 style={SERIF} className="text-5xl md:text-6xl lg:text-7xl font-medium leading-[1.05]
+                    <h1 className="h-seriftext-5xl md:text-6xl lg:text-7xl font-medium leading-[1.05]
                                                   text-slate-900 dark:text-white max-w-4xl mx-auto">
                         The job market doesn't have to be confusing in a new country.
                     </h1>
@@ -153,7 +150,7 @@ const Home = () => {
                 <div className="mx-auto max-w-6xl px-6">
                     <div className="text-center mb-14">
                         <p className="text-sm font-bold tracking-widest uppercase text-sky-700 dark:text-sky-400">How it works</p>
-                        <h2 style={SERIF} className="text-4xl md:text-5xl font-medium mt-3 text-slate-900 dark:text-white">
+                        <h2 className="h-seriftext-4xl md:text-5xl font-medium mt-3 text-slate-900 dark:text-white">
                             From your resume to your next job in three steps.
                         </h2>
                     </div>
@@ -169,10 +166,10 @@ const Home = () => {
                                             bg-white border-slate-200
                                             dark:bg-slate-950/60 dark:border-slate-800">
                                 <div className="flex items-center gap-3 mb-4">
-                                    <span style={SERIF} className="text-3xl font-medium text-sky-700 dark:text-sky-400">{step.n}</span>
+                                    <span className="h-seriftext-3xl font-medium text-sky-700 dark:text-sky-400">{step.n}</span>
                                     <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
                                 </div>
-                                <h3 style={SERIF} className="text-2xl font-medium mb-3 text-slate-900 dark:text-white">{step.title}</h3>
+                                <h3 className="h-seriftext-2xl font-medium mb-3 text-slate-900 dark:text-white">{step.title}</h3>
                                 <p className="leading-relaxed text-slate-600 dark:text-slate-400">{step.desc}</p>
                             </div>
                         ))}
@@ -185,7 +182,7 @@ const Home = () => {
                 <div className="mx-auto max-w-6xl px-6 grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
                     <div>
                         <p className="text-sm font-bold tracking-widest uppercase text-sky-700 dark:text-sky-400">Real matching, not keyword soup</p>
-                        <h2 style={SERIF} className="text-4xl md:text-5xl font-medium mt-3 leading-tight text-slate-900 dark:text-white">
+                        <h2 className="h-seriftext-4xl md:text-5xl font-medium mt-3 leading-tight text-slate-900 dark:text-white">
                             See exactly how well each job fits your background — and why.
                         </h2>
                         <p className="mt-5 text-lg leading-relaxed text-slate-600 dark:text-slate-400">
@@ -232,7 +229,7 @@ const Home = () => {
                                 dark:bg-slate-900 dark:border-slate-800">
                 <div className="mx-auto max-w-6xl px-6 text-center">
                     <p className="text-sm font-bold tracking-widest uppercase text-sky-700 dark:text-sky-400">Languages we speak</p>
-                    <h2 style={SERIF} className="text-4xl md:text-5xl font-medium mt-3 text-slate-900 dark:text-white">
+                    <h2 className="h-seriftext-4xl md:text-5xl font-medium mt-3 text-slate-900 dark:text-white">
                         Upload your resume in the language it was written in.
                     </h2>
                     <p className="mt-5 text-lg max-w-2xl mx-auto text-slate-600 dark:text-slate-400">
@@ -251,7 +248,7 @@ const Home = () => {
                                  className="border rounded-xl py-5 px-3
                                             bg-white border-slate-200
                                             dark:bg-slate-950/60 dark:border-slate-800">
-                                <p style={SERIF} className="text-xl font-medium text-slate-900 dark:text-white">{l.native}</p>
+                                <p className="h-seriftext-xl font-medium text-slate-900 dark:text-white">{l.native}</p>
                                 <p className="text-xs mt-1 text-slate-500">{l.en}</p>
                             </div>
                         ))}
@@ -264,7 +261,7 @@ const Home = () => {
                 <div className="mx-auto max-w-6xl px-6">
                     <div className="text-center mb-14">
                         <p className="text-sm font-bold tracking-widest uppercase text-sky-700 dark:text-sky-400">Stories</p>
-                        <h2 style={SERIF} className="text-4xl md:text-5xl font-medium mt-3 text-slate-900 dark:text-white">From qualified — to hired.</h2>
+                        <h2 className="h-seriftext-4xl md:text-5xl font-medium mt-3 text-slate-900 dark:text-white">From qualified — to hired.</h2>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <Story initials="MR" bg="bg-sky-700" name="Maria R." role="Registered Nurse · Houston, TX"
@@ -283,7 +280,7 @@ const Home = () => {
             {/* ============================== FINAL CTA ============================== */}
             <section className="bg-sky-700 dark:bg-sky-800 text-white">
                 <div className="mx-auto max-w-4xl px-6 py-20 text-center">
-                    <h2 style={SERIF} className="text-4xl md:text-5xl font-medium leading-tight">
+                    <h2 className="h-seriftext-4xl md:text-5xl font-medium leading-tight">
                         Start with your resume. We'll handle the rest.
                     </h2>
                     <p className="mt-5 text-lg max-w-2xl mx-auto text-sky-100">

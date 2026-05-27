@@ -79,7 +79,7 @@ export default function Resumes() {
     <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20">
       <div className="flex items-center justify-between mb-8 gap-3 flex-wrap">
         <div>
-          <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Your resumes</h1>
+          <h1 className="h-serif text-4xl font-medium text-slate-900 dark:text-white">Your resumes</h1>
           <p className="mt-1 text-slate-500 dark:text-slate-400">
             {resumes.length === 0
               ? 'Upload your first resume to get started.'

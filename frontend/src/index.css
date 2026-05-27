@@ -6,11 +6,11 @@
    and toggled by store/theme.js. */
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* Default body background per theme. Individual pages still set their
-   own backgrounds; this is the fallback that shows behind any gaps and
-   while pages are mounting.
+/* Default body background per theme — matches the design-system
+   mockups. Light = slate-50 (gives white cards a visible boundary).
+   Dark = slate-950 (deep near-black with subtle blue undertone).
    Note: .dark is on <html>, so .dark body works via descendant selector. */
-body { background: #ffffff; color: #0f172a; }
+body { background: #f8fafc; color: #0c4a6e; }
 .dark body { background: #020617; color: #e2e8f0; }
 
 :root {
@@ -27,17 +27,27 @@ body { background: #ffffff; color: #0f172a; }
 
 body {
   margin: 0;
-  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Lato is the design-system body font (matches the mockups and the
+     redesigned Home). Falls back to Inter for legacy if Lato isn't
+     loaded, then to system sans. */
+  font-family: 'Lato', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
   overflow-x: hidden;
 }
 
-/* The shared layout wrapper — flat bg per theme (no more legacy
-   indigo gradient now that all pages are ported to the new design). */
-.app-container { min-height: 100vh; background: #ffffff; }
-.dark .app-container { background: #020617; }
+/* Heading font for distinctive titles — used across pages to keep the
+   editorial / employment-platform feel established on the Home page.
+   Apply via className="h-serif" on any element. */
+.h-serif {
+  font-family: 'EB Garamond', Georgia, serif;
+  letter-spacing: -0.01em;
+}
+
+/* Shared layout wrapper. Transparent so the body bg (slate-50 / slate-950)
+   shows through; pages that want a different bg set it directly. */
+.app-container { min-height: 100vh; }
 
 /* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {

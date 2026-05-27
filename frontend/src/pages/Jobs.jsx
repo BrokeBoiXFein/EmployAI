@@ -162,7 +162,7 @@ export default function Jobs() {
     return (
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20">
             <div className="mb-8">
-                <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Your jobs</h1>
+                <h1 className="h-serif text-4xl font-medium text-slate-900 dark:text-white">Your jobs</h1>
                 <p className="mt-1 text-slate-500 dark:text-slate-400">Saved bookmarks and applications you're tracking.</p>
             </div>
 
