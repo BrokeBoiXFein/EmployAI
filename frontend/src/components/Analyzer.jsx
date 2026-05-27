@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { FileText, ChevronDown, FolderOpen, Lightbulb, X, MessageCircle } from 'lucide-react';
+import { FileText, ChevronDown, FolderOpen, Lightbulb, X, MessageCircle, Sparkles } from 'lucide-react';
 import ResumeUpload from './ResumeUpload';
 import AnalysisResults from './AnalysisResults';
 import JobMatches from './JobMatches';
 import ChatWidget from './ChatWidget';
 import { api } from '../services/api';
+
+// Read what the user typed on the Home page (if anything) and stash here.
+// Keep in sync with Home.jsx's INTENT_KEY constant.
+const INTENT_KEY = 'employai_intent';
 
 const stripHtml = (html) => {
     if (!html) return 'No description available';
@@ -46,6 +50,12 @@ export default function Analyzer({ language, t, translations, setLanguage }) {
     // JobMatches cards can render the right state. Using Sets for O(1) lookup.
     const [savedIds, setSavedIds] = useState(() => new Set());
     const [appliedIds, setAppliedIds] = useState(() => new Set());
+
+    // The user's typed intent (from Home). If present, gets blended with
+    // the resume embedding server-side to bias the matches.
+    const [focusText, setFocusText] = useState(() => {
+        try { return localStorage.getItem(INTENT_KEY) || ''; } catch { return ''; }
+    });
 
     // Chat state
     const [chatOpen, setChatOpen] = useState(false);
@@ -210,19 +220,34 @@ export default function Analyzer({ language, t, translations, setLanguage }) {
         }
     };
 
-    // Backend: looks up resume by id, uses its embedding to score & sort
-    // jobs from Adzuna by semantic similarity. Returns jobs[].matchScore in [-1, 1].
-    const searchJobs = async (resumeId) => {
+    // Backend: looks up resume by id, uses its embedding (optionally blended
+    // with the user's typed intent) to score & sort Adzuna jobs by semantic
+    // similarity. Returns jobs[].matchScore in [-1, 1].
+    const searchJobs = async (resumeId, intentOverride) => {
         if (!resumeId) return;
         setJobsLoading(true);
         try {
-            const data = await api.post('/api/search-jobs', { resumeId });
+            // Allow explicit override (e.g. when clearing the chip) so we
+            // don't race the focusText state update.
+            const focus = intentOverride !== undefined ? intentOverride : focusText;
+            const data = await api.post('/api/search-jobs', {
+                resumeId,
+                focusText: focus || undefined
+            });
             if (data.success) setJobs(data.jobs);
         } catch (err) {
             console.error('Job search error:', err);
         } finally {
             setJobsLoading(false);
         }
+    };
+
+    const clearIntent = () => {
+        try { localStorage.removeItem(INTENT_KEY); } catch { /* ignore */ }
+        setFocusText('');
+        // Re-run search without the intent bias so the user sees the
+        // change immediately
+        if (activeResumeId) searchJobs(activeResumeId, '');
     };
 
     // Accepts an optional explicit text. When called without args, falls back
@@ -286,34 +311,60 @@ export default function Analyzer({ language, t, translations, setLanguage }) {
     };
 
     return (
-        <>
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-8 pb-20">
             {/* Switcher — only shown if the user has at least one resume */}
             {resumes.length > 0 && (
-                <div className="max-w-3xl mx-auto mb-6 flex flex-wrap items-center gap-3 bg-indigo-950/60 border border-indigo-900/50 rounded-2xl px-4 py-3 backdrop-blur-md">
-                    <div className="flex items-center gap-2 text-indigo-200/80 text-sm">
-                        <FileText className="w-4 h-4 text-indigo-300" />
+                <div className="max-w-3xl mx-auto mb-6 flex flex-wrap items-center gap-3 px-4 py-3 rounded-2xl
+                                bg-white border border-slate-200
+                                dark:bg-slate-900 dark:border-slate-800">
+                    <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                        <FileText className="w-4 h-4 text-sky-700 dark:text-sky-400" />
                         Active resume:
                     </div>
                     <div className="relative flex-1 min-w-[180px]">
-                        <select
-                            value={activeResumeId || ''}
-                            onChange={(e) => switchActive(e.target.value)}
-                            className="w-full appearance-none bg-indigo-900/40 border border-indigo-800/50 rounded-xl pl-3 pr-9 py-2 text-white text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 cursor-pointer"
-                        >
+                        <select value={activeResumeId || ''}
+                                onChange={(e) => switchActive(e.target.value)}
+                                className="w-full appearance-none rounded-xl pl-3 pr-9 py-2 text-sm cursor-pointer
+                                           bg-slate-50 border border-slate-200 text-slate-900
+                                           dark:bg-slate-800 dark:border-slate-700 dark:text-white
+                                           focus:outline-none focus:ring-2 focus:ring-sky-500">
                             {!activeResumeId && <option value="">— pick a resume —</option>}
                             {resumes.map(r => (
-                                <option key={r.id} value={r.id} className="bg-indigo-950">{r.label}</option>
+                                <option key={r.id} value={r.id} className="bg-white text-slate-900 dark:bg-slate-900 dark:text-white">{r.label}</option>
                             ))}
                         </select>
-                        <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-indigo-300 pointer-events-none" />
+                        <ChevronDown className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500 pointer-events-none" />
                     </div>
-                    <Link
-                        to="/resumes"
-                        className="flex items-center gap-1.5 text-sm text-indigo-300 hover:text-white px-3 py-2 rounded-xl hover:bg-white/5 transition"
-                    >
+                    <Link to="/resumes"
+                          className="flex items-center gap-1.5 text-sm px-3 py-2 rounded-xl transition-colors cursor-pointer
+                                     text-slate-600 hover:text-slate-900 hover:bg-slate-100
+                                     dark:text-slate-300 dark:hover:text-white dark:hover:bg-slate-800">
                         <FolderOpen className="w-4 h-4" />
                         Manage
                     </Link>
+                </div>
+            )}
+
+            {/* Intent chip — appears if the user typed something on Home.
+                Shows what we're biasing matches toward, with a dismiss button. */}
+            {focusText && (
+                <div className="max-w-3xl mx-auto mb-6 flex items-center gap-3 px-4 py-3 rounded-2xl
+                                bg-sky-50 border border-sky-200
+                                dark:bg-sky-500/10 dark:border-sky-500/30">
+                    <Sparkles className="w-4 h-4 text-sky-700 dark:text-sky-400 shrink-0" />
+                    <div className="flex-1 text-sm min-w-0">
+                        <span className="font-semibold text-sky-900 dark:text-sky-200">Biasing matches toward:</span>{' '}
+                        <span className="text-sky-800 dark:text-sky-100 italic">"{focusText}"</span>
+                    </div>
+                    <button
+                        onClick={clearIntent}
+                        className="p-1.5 rounded-lg text-sky-700 hover:text-sky-900 hover:bg-sky-100
+                                   dark:text-sky-400 dark:hover:text-white dark:hover:bg-sky-500/20
+                                   transition-colors cursor-pointer shrink-0"
+                        title="Clear intent and re-rank"
+                    >
+                        <X className="w-4 h-4" />
+                    </button>
                 </div>
             )}
 
@@ -326,37 +377,43 @@ export default function Analyzer({ language, t, translations, setLanguage }) {
             />
 
             {error && (
-                <div className="max-w-3xl mx-auto mb-8 p-4 bg-red-500/10 border border-red-500/20 rounded-2xl text-red-400 text-center animate-in shake duration-500">
+                <div className="max-w-3xl mx-auto mb-8 p-4 rounded-2xl text-center
+                                bg-red-50 border border-red-200 text-red-700
+                                dark:bg-red-500/10 dark:border-red-500/30 dark:text-red-300">
                     {error}
                 </div>
             )}
 
             {showLowMatchBanner && (
-                <div className="max-w-5xl mx-auto mb-6 flex items-start gap-3 bg-amber-500/10 border border-amber-500/30 rounded-2xl p-4 backdrop-blur-md">
-                    <div className="bg-amber-500/20 p-2 rounded-xl shrink-0">
-                        <Lightbulb className="w-5 h-5 text-amber-300" />
+                <div className="max-w-5xl mx-auto mb-6 flex items-start gap-3 p-4 rounded-2xl
+                                bg-amber-50 border border-amber-200
+                                dark:bg-amber-500/10 dark:border-amber-500/30">
+                    <div className="p-2 rounded-xl shrink-0
+                                    bg-amber-100 text-amber-700
+                                    dark:bg-amber-500/20 dark:text-amber-300">
+                        <Lightbulb className="w-5 h-5" />
                     </div>
                     <div className="flex-1 min-w-0">
-                        <p className="text-white font-semibold">
+                        <p className="font-semibold text-amber-900 dark:text-amber-100">
                             Your top match is only {Math.max(0, Math.round(topScore * 100))}%.
                         </p>
-                        <p className="text-amber-200/80 text-sm mt-0.5">
+                        <p className="text-sm mt-0.5 text-amber-800 dark:text-amber-200/80">
                             Want the AI assistant to suggest specific resume tweaks or alternative job titles to explore?
                         </p>
                     </div>
                     <div className="flex items-center gap-2 shrink-0">
-                        <button
-                            onClick={() => askChatForHelp(Math.max(0, Math.round(topScore * 100)))}
-                            className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-semibold bg-amber-500 hover:bg-amber-400 text-amber-950 shadow-lg shadow-amber-500/20 transition"
-                        >
+                        <button onClick={() => askChatForHelp(Math.max(0, Math.round(topScore * 100)))}
+                                className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl text-sm font-bold transition-colors cursor-pointer
+                                           bg-amber-500 hover:bg-amber-600 text-amber-950
+                                           dark:bg-amber-500 dark:hover:bg-amber-400">
                             <MessageCircle className="w-4 h-4" />
                             Get tips
                         </button>
-                        <button
-                            onClick={() => setBannerDismissed(true)}
-                            className="p-2 rounded-xl text-amber-200/70 hover:text-white hover:bg-white/5 transition"
-                            title="Dismiss"
-                        >
+                        <button onClick={() => setBannerDismissed(true)}
+                                className="p-2 rounded-xl transition-colors cursor-pointer
+                                           text-amber-700 hover:text-amber-900 hover:bg-amber-100
+                                           dark:text-amber-300 dark:hover:text-white dark:hover:bg-amber-500/20"
+                                title="Dismiss">
                             <X className="w-4 h-4" />
                         </button>
                     </div>
@@ -391,6 +448,6 @@ export default function Analyzer({ language, t, translations, setLanguage }) {
                 chatLoading={chatLoading}
                 t={t}
             />
-        </>
+        </div>
     );
 }

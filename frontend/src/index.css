@@ -1,5 +1,17 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=EB+Garamond:wght@400;500;600;700&family=Lato:wght@300;400;700;900&display=swap');
 @import "tailwindcss";
+
+/* Enable class-based dark mode in Tailwind v4 (default is media-query based).
+   The .dark class on <html> is set by the FOUC-prevention script in index.html
+   and toggled by store/theme.js. */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* Default body background per theme. Individual pages still set their
+   own backgrounds; this is the fallback that shows behind any gaps and
+   while pages are mounting.
+   Note: .dark is on <html>, so .dark body works via descendant selector. */
+body { background: #ffffff; color: #0f172a; }
+.dark body { background: #020617; color: #e2e8f0; }
 
 :root {
   --primary: #4f46e5;
@@ -16,21 +28,16 @@
 body {
   margin: 0;
   font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: var(--bg-dark);
-  color: #f8fafc;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
   overflow-x: hidden;
 }
 
-/* Base Gradient Background */
-.app-container {
-  min-height: 100vh;
-  background: radial-gradient(circle at top right, #1e1b4b, #0f172a 50%),
-    radial-gradient(circle at bottom left, #0c4a6e, #0f172a 50%);
-  background-attachment: fixed;
-}
+/* The shared layout wrapper — flat bg per theme (no more legacy
+   indigo gradient now that all pages are ported to the new design). */
+.app-container { min-height: 100vh; background: #ffffff; }
+.dark .app-container { background: #020617; }
 
 /* Custom Scrollbar */
 .custom-scrollbar::-webkit-scrollbar {

@@ -1,0 +1,385 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EmployAI — Redesign Preview</title>
+  <!-- Tailwind via CDN — for quick preview only; production would use a build. -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"EB Garamond"', 'Georgia', 'serif'],
+            sans:  ['Lato', 'system-ui', 'sans-serif']
+          },
+          colors: {
+            ink:   { 900: '#0C4A6E', 700: '#155E75', 500: '#0369A1', 300: '#0EA5E9' },
+            paper: { 50:  '#F8FAFC', 100: '#F0F9FF', 200: '#E0F2FE' },
+            grass: { 600: '#16A34A', 500: '#22C55E', 400: '#4ADE80' },
+            line:  '#CBD5E1'
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+    body { font-family: 'Lato', system-ui, sans-serif; color: #0C4A6E; background: #FFFFFF; }
+    .h-serif { font-family: 'EB Garamond', Georgia, serif; letter-spacing: -0.01em; }
+    /* Subtle dotted background for the hero — credible, not flashy */
+    .dotted {
+      background-image: radial-gradient(#CBD5E1 1px, transparent 1px);
+      background-size: 22px 22px;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      * { transition: none !important; animation: none !important; }
+    }
+  </style>
+</head>
+
+<body class="antialiased">
+
+<!-- ============================================================ -->
+<!-- NAVBAR — clean, white background, no glass effect             -->
+<!-- ============================================================ -->
+<header class="border-b border-slate-200 bg-white">
+  <div class="mx-auto max-w-7xl px-6 py-4 flex items-center justify-between">
+    <a href="#" class="flex items-center gap-2">
+      <!-- Logo mark: simple geometric, no AI-gradient -->
+      <span class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-ink-500 text-white font-bold text-lg">E</span>
+      <span class="text-xl font-bold tracking-tight text-ink-900">EmployAI</span>
+    </a>
+
+    <nav class="hidden md:flex items-center gap-8 text-sm font-medium text-slate-700">
+      <a href="#how" class="hover:text-ink-500 transition-colors">How it works</a>
+      <a href="#features" class="hover:text-ink-500 transition-colors">What it does</a>
+      <a href="#languages" class="hover:text-ink-500 transition-colors">Languages</a>
+      <a href="#stories" class="hover:text-ink-500 transition-colors">Stories</a>
+    </nav>
+
+    <div class="flex items-center gap-3">
+      <!-- Language picker (real product would be functional) -->
+      <button class="hidden sm:inline-flex items-center gap-1.5 text-sm text-slate-700 hover:text-ink-500 px-3 py-1.5 rounded-md transition-colors cursor-pointer">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg>
+        English
+      </button>
+      <a href="#" class="text-sm font-semibold text-ink-500 hover:text-ink-700 px-3 py-1.5 transition-colors cursor-pointer">Log in</a>
+      <a href="#" class="text-sm font-semibold text-white bg-grass-500 hover:bg-grass-600 px-4 py-2 rounded-md transition-colors cursor-pointer">Get started — free</a>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================================ -->
+<!-- HERO — search-first, addresses the user directly              -->
+<!-- ============================================================ -->
+<section class="dotted">
+  <div class="mx-auto max-w-6xl px-6 pt-20 pb-24 text-center">
+    <span class="inline-block text-xs font-bold tracking-widest uppercase text-ink-500 mb-5">Built for immigrants &middot; Works in 6 languages</span>
+
+    <h1 class="h-serif text-5xl md:text-6xl lg:text-7xl font-medium leading-[1.05] text-ink-900 max-w-4xl mx-auto">
+      The job market doesn't have to be confusing in a new country.
+    </h1>
+
+    <p class="mt-7 text-lg md:text-xl text-slate-600 max-w-2xl mx-auto leading-relaxed">
+      Upload your resume in any language. EmployAI translates it, matches you to real US jobs, and coaches you toward better offers — for free.
+    </p>
+
+    <!-- Search-first CTA. The "search" is actually "upload your resume" because that's the entry point. -->
+    <form class="mt-10 max-w-2xl mx-auto bg-white border border-slate-200 rounded-2xl p-2 flex flex-col sm:flex-row items-stretch gap-2" onsubmit="event.preventDefault();">
+      <div class="flex-1 flex items-center gap-3 px-4 py-3">
+        <svg class="w-5 h-5 text-slate-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 3v4a1 1 0 0 0 1 1h4"/><path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z"/><path d="M9 13h6M9 17h6"/></svg>
+        <input type="text" placeholder="Tell us what kind of work you're looking for…"
+               class="flex-1 bg-transparent outline-none text-base placeholder:text-slate-400 text-ink-900" />
+      </div>
+      <button class="bg-grass-500 hover:bg-grass-600 text-white font-bold px-6 py-3 rounded-xl transition-colors cursor-pointer flex items-center justify-center gap-2">
+        Upload my resume
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </button>
+    </form>
+
+    <!-- Popular searches — a marketplace pattern that reduces blank-search friction -->
+    <div class="mt-5 text-sm text-slate-500 flex items-center justify-center flex-wrap gap-x-3 gap-y-1">
+      <span>Popular:</span>
+      <a href="#" class="text-ink-500 hover:underline cursor-pointer">Software Engineer</a>
+      <span class="text-slate-300">·</span>
+      <a href="#" class="text-ink-500 hover:underline cursor-pointer">Registered Nurse</a>
+      <span class="text-slate-300">·</span>
+      <a href="#" class="text-ink-500 hover:underline cursor-pointer">Construction</a>
+      <span class="text-slate-300">·</span>
+      <a href="#" class="text-ink-500 hover:underline cursor-pointer">Accounting</a>
+    </div>
+
+    <!-- Trust strip -->
+    <div class="mt-14 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-sm">
+      <div class="flex items-center gap-2 text-slate-600">
+        <svg class="w-5 h-5 text-grass-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        No fee. No credit card.
+      </div>
+      <div class="flex items-center gap-2 text-slate-600">
+        <svg class="w-5 h-5 text-grass-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        Your resume stays private
+      </div>
+      <div class="flex items-center gap-2 text-slate-600">
+        <svg class="w-5 h-5 text-grass-500" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+        Works in any language
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- HOW IT WORKS — three steps, numbered, clean                  -->
+<!-- ============================================================ -->
+<section id="how" class="bg-paper-100 border-y border-slate-200 py-24">
+  <div class="mx-auto max-w-6xl px-6">
+    <div class="text-center mb-14">
+      <p class="text-sm font-bold tracking-widest uppercase text-ink-500">How it works</p>
+      <h2 class="h-serif text-4xl md:text-5xl font-medium text-ink-900 mt-3">From your resume to your next job in three steps.</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <!-- Step 1 -->
+      <div class="bg-white border border-slate-200 rounded-xl p-7">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="h-serif text-3xl font-medium text-ink-500">01</span>
+          <div class="h-px flex-1 bg-slate-200"></div>
+        </div>
+        <h3 class="h-serif text-2xl font-medium text-ink-900 mb-3">Upload, in any language</h3>
+        <p class="text-slate-600 leading-relaxed">Drop your resume — PDF, Word, or even a photo. We support Spanish, French, Arabic, Chinese, Hindi, and English. We translate and structure it automatically.</p>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="bg-white border border-slate-200 rounded-xl p-7">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="h-serif text-3xl font-medium text-ink-500">02</span>
+          <div class="h-px flex-1 bg-slate-200"></div>
+        </div>
+        <h3 class="h-serif text-2xl font-medium text-ink-900 mb-3">See real matched jobs</h3>
+        <p class="text-slate-600 leading-relaxed">We compare your skills to live US job listings using meaning — not just keywords — so a payment-processing engineer in Argentina gets matched to fintech roles, not generic "engineer" results.</p>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="bg-white border border-slate-200 rounded-xl p-7">
+        <div class="flex items-center gap-3 mb-4">
+          <span class="h-serif text-3xl font-medium text-ink-500">03</span>
+          <div class="h-px flex-1 bg-slate-200"></div>
+        </div>
+        <h3 class="h-serif text-2xl font-medium text-ink-900 mb-3">Improve and apply</h3>
+        <p class="text-slate-600 leading-relaxed">Your AI coach suggests specific edits to make your resume stronger for US employers — and builds you a properly-formatted US version, ready to download.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- FEATURE: live match preview (the killer feature, made visual) -->
+<!-- ============================================================ -->
+<section id="features" class="py-24 bg-white">
+  <div class="mx-auto max-w-6xl px-6 grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
+    <div>
+      <p class="text-sm font-bold tracking-widest uppercase text-ink-500">Real matching, not keyword soup</p>
+      <h2 class="h-serif text-4xl md:text-5xl font-medium text-ink-900 mt-3 leading-tight">See exactly how well each job fits your background — and why.</h2>
+      <p class="mt-5 text-lg text-slate-600 leading-relaxed">Most job sites rank by how recently the listing was posted, or how loudly the employer paid to be featured. EmployAI ranks by how well your skills and experience actually match the role.</p>
+      <ul class="mt-6 space-y-3 text-slate-700">
+        <li class="flex gap-3">
+          <svg class="w-5 h-5 text-grass-500 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+          <span><b>Color-coded match scores</b> — see which jobs are worth your time at a glance.</span>
+        </li>
+        <li class="flex gap-3">
+          <svg class="w-5 h-5 text-grass-500 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+          <span><b>Watch scores rise</b> as you accept resume improvements.</span>
+        </li>
+        <li class="flex gap-3">
+          <svg class="w-5 h-5 text-grass-500 mt-0.5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+          <span><b>Save and track</b> applications through interview to offer.</span>
+        </li>
+      </ul>
+    </div>
+
+    <!-- Stylized job-match preview -->
+    <div class="bg-paper-100 border border-slate-200 rounded-2xl p-6">
+      <p class="text-xs uppercase tracking-widest text-slate-500 font-bold mb-4">Top matches for you</p>
+
+      <div class="space-y-3">
+        <!-- Job card 1 -->
+        <div class="bg-white border border-slate-200 rounded-xl p-4 flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <p class="font-bold text-ink-900">Backend Engineer (Payments)</p>
+            <p class="text-sm text-slate-600">Stripe · Remote, US</p>
+            <p class="text-xs text-slate-500 mt-1">$140k–$190k</p>
+          </div>
+          <span class="shrink-0 text-xs font-bold px-2.5 py-1 rounded-full bg-grass-500 text-white">82% match</span>
+        </div>
+
+        <!-- Job card 2 -->
+        <div class="bg-white border border-slate-200 rounded-xl p-4 flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <p class="font-bold text-ink-900">Software Engineer, Platform</p>
+            <p class="text-sm text-slate-600">Plaid · New York, NY</p>
+            <p class="text-xs text-slate-500 mt-1">$130k–$170k</p>
+          </div>
+          <span class="shrink-0 text-xs font-bold px-2.5 py-1 rounded-full bg-ink-500 text-white">71% match</span>
+        </div>
+
+        <!-- Job card 3 -->
+        <div class="bg-white border border-slate-200 rounded-xl p-4 flex items-start justify-between gap-3">
+          <div class="min-w-0">
+            <p class="font-bold text-ink-900">Senior Software Developer</p>
+            <p class="text-sm text-slate-600">Block (Square) · San Francisco</p>
+            <p class="text-xs text-slate-500 mt-1">$155k–$210k</p>
+          </div>
+          <span class="shrink-0 text-xs font-bold px-2.5 py-1 rounded-full bg-ink-300 text-white">68% match</span>
+        </div>
+
+        <!-- Job card 4 — lower match, amber -->
+        <div class="bg-white border border-slate-200 rounded-xl p-4 flex items-start justify-between gap-3 opacity-80">
+          <div class="min-w-0">
+            <p class="font-bold text-ink-900">Full-Stack Developer</p>
+            <p class="text-sm text-slate-600">Acme Health · Boston, MA</p>
+            <p class="text-xs text-slate-500 mt-1">$110k–$135k</p>
+          </div>
+          <span class="shrink-0 text-xs font-bold px-2.5 py-1 rounded-full bg-amber-500 text-white">52% match</span>
+        </div>
+      </div>
+
+      <p class="mt-4 text-xs text-slate-500 text-center">Live preview · Match scores generated from a real resume in seconds.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- LANGUAGES — credibility through specificity                   -->
+<!-- ============================================================ -->
+<section id="languages" class="bg-paper-100 border-y border-slate-200 py-20">
+  <div class="mx-auto max-w-6xl px-6 text-center">
+    <p class="text-sm font-bold tracking-widest uppercase text-ink-500">Languages we speak</p>
+    <h2 class="h-serif text-4xl md:text-5xl font-medium text-ink-900 mt-3">Upload your resume in the language it was written in.</h2>
+    <p class="mt-5 text-lg text-slate-600 max-w-2xl mx-auto">Six languages today. More on the way as we hear from job seekers around the world.</p>
+
+    <div class="mt-12 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 max-w-4xl mx-auto">
+      <div class="bg-white border border-slate-200 rounded-xl py-5 px-3"><p class="text-xl h-serif font-medium text-ink-900">English</p><p class="text-xs text-slate-500 mt-1">English</p></div>
+      <div class="bg-white border border-slate-200 rounded-xl py-5 px-3"><p class="text-xl h-serif font-medium text-ink-900">Español</p><p class="text-xs text-slate-500 mt-1">Spanish</p></div>
+      <div class="bg-white border border-slate-200 rounded-xl py-5 px-3"><p class="text-xl h-serif font-medium text-ink-900">Français</p><p class="text-xs text-slate-500 mt-1">French</p></div>
+      <div class="bg-white border border-slate-200 rounded-xl py-5 px-3"><p class="text-xl h-serif font-medium text-ink-900">العربية</p><p class="text-xs text-slate-500 mt-1">Arabic</p></div>
+      <div class="bg-white border border-slate-200 rounded-xl py-5 px-3"><p class="text-xl h-serif font-medium text-ink-900">中文</p><p class="text-xs text-slate-500 mt-1">Chinese</p></div>
+      <div class="bg-white border border-slate-200 rounded-xl py-5 px-3"><p class="text-xl h-serif font-medium text-ink-900">हिन्दी</p><p class="text-xs text-slate-500 mt-1">Hindi</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- STORIES — placeholder spots for real photos                   -->
+<!-- ============================================================ -->
+<section id="stories" class="py-24 bg-white">
+  <div class="mx-auto max-w-6xl px-6">
+    <div class="text-center mb-14">
+      <p class="text-sm font-bold tracking-widest uppercase text-ink-500">Stories</p>
+      <h2 class="h-serif text-4xl md:text-5xl font-medium text-ink-900 mt-3">From qualified — to hired.</h2>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <!-- Card 1 — placeholder photo block -->
+      <article class="bg-white border border-slate-200 rounded-xl overflow-hidden flex flex-col">
+        <div class="aspect-[4/3] bg-paper-200 flex items-center justify-center">
+          <!-- Initials placeholder (real version uses a portrait) -->
+          <span class="h-24 w-24 rounded-full bg-ink-500 text-white inline-flex items-center justify-center text-2xl font-bold h-serif">MR</span>
+        </div>
+        <div class="p-6">
+          <p class="text-base text-ink-900 leading-relaxed">"My nursing license was from Mexico. EmployAI mapped it to its US equivalent and matched me with a clinic that wanted exactly my experience."</p>
+          <p class="mt-4 text-sm font-bold text-ink-700">Maria R.</p>
+          <p class="text-xs text-slate-500">Registered Nurse · Houston, TX</p>
+        </div>
+      </article>
+
+      <!-- Card 2 -->
+      <article class="bg-white border border-slate-200 rounded-xl overflow-hidden flex flex-col">
+        <div class="aspect-[4/3] bg-paper-200 flex items-center justify-center">
+          <span class="h-24 w-24 rounded-full bg-ink-700 text-white inline-flex items-center justify-center text-2xl font-bold h-serif">AK</span>
+        </div>
+        <div class="p-6">
+          <p class="text-base text-ink-900 leading-relaxed">"I uploaded my CV in Arabic and got my first three interviews within a week. Nobody else was matching me on what I could actually do."</p>
+          <p class="mt-4 text-sm font-bold text-ink-700">Ahmad K.</p>
+          <p class="text-xs text-slate-500">Civil Engineer · Detroit, MI</p>
+        </div>
+      </article>
+
+      <!-- Card 3 -->
+      <article class="bg-white border border-slate-200 rounded-xl overflow-hidden flex flex-col">
+        <div class="aspect-[4/3] bg-paper-200 flex items-center justify-center">
+          <span class="h-24 w-24 rounded-full bg-grass-600 text-white inline-flex items-center justify-center text-2xl font-bold h-serif">LZ</span>
+        </div>
+        <div class="p-6">
+          <p class="text-base text-ink-900 leading-relaxed">"The resume coach told me which bullets to rewrite and why. My top match jumped from 51% to 78% in an afternoon."</p>
+          <p class="mt-4 text-sm font-bold text-ink-700">Linh Z.</p>
+          <p class="text-xs text-slate-500">Data Analyst · Seattle, WA</p>
+        </div>
+      </article>
+    </div>
+
+    <p class="text-center text-xs text-slate-500 mt-8 italic">Stories above use placeholder portraits. Real testimonials and photos go here.</p>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- FINAL CTA                                                     -->
+<!-- ============================================================ -->
+<section class="bg-ink-500 text-white">
+  <div class="mx-auto max-w-4xl px-6 py-20 text-center">
+    <h2 class="h-serif text-4xl md:text-5xl font-medium leading-tight">Start with your resume. We'll handle the rest.</h2>
+    <p class="mt-5 text-lg text-paper-100/90 max-w-2xl mx-auto">Free to use. Available in six languages. Nothing to install.</p>
+    <div class="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+      <a href="#" class="inline-flex items-center justify-center gap-2 bg-grass-500 hover:bg-grass-600 text-white font-bold px-7 py-3.5 rounded-md transition-colors cursor-pointer">
+        Upload my resume — free
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+      </a>
+      <a href="#how" class="inline-flex items-center justify-center text-white/90 hover:text-white font-semibold px-7 py-3.5 rounded-md border border-white/30 hover:border-white transition-colors cursor-pointer">
+        See how it works
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- ============================================================ -->
+<!-- FOOTER                                                        -->
+<!-- ============================================================ -->
+<footer class="bg-ink-900 text-paper-100/80">
+  <div class="mx-auto max-w-7xl px-6 py-14 grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
+    <div class="col-span-2">
+      <div class="flex items-center gap-2 mb-3">
+        <span class="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white text-ink-900 font-bold">E</span>
+        <span class="text-lg font-bold text-white">EmployAI</span>
+      </div>
+      <p class="leading-relaxed max-w-sm">A multilingual AI job-search platform built for immigrants navigating the US labor market. Free, private, and human-friendly.</p>
+    </div>
+    <div>
+      <p class="text-white font-bold mb-3">Product</p>
+      <ul class="space-y-2">
+        <li><a href="#" class="hover:text-white transition-colors">How it works</a></li>
+        <li><a href="#" class="hover:text-white transition-colors">Resume Studio</a></li>
+        <li><a href="#" class="hover:text-white transition-colors">Job matching</a></li>
+        <li><a href="#" class="hover:text-white transition-colors">Application tracking</a></li>
+      </ul>
+    </div>
+    <div>
+      <p class="text-white font-bold mb-3">About</p>
+      <ul class="space-y-2">
+        <li><a href="#" class="hover:text-white transition-colors">The team</a></li>
+        <li><a href="#" class="hover:text-white transition-colors">Mission</a></li>
+        <li><a href="#" class="hover:text-white transition-colors">Privacy</a></li>
+        <li><a href="https://github.com/BrokeBoiXFein/EmployAI" class="hover:text-white transition-colors">GitHub</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="border-t border-white/10">
+    <p class="mx-auto max-w-7xl px-6 py-5 text-xs text-paper-100/50">© 2026 EmployAI — Jericho Senior High School project. Not a legal employer or licensed immigration service.</p>
+  </div>
+</footer>
+
+</body>
+</html>

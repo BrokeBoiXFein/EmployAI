@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { translations } from './constants';
 import { useAuth } from './store/auth';
+import { useTheme } from './store/theme';
 
 // Component Imports
 import Navbar from './components/Navbar';
@@ -18,9 +19,12 @@ export default function App() {
   const [language, setLanguage] = useState('en');
   const t = translations[language];
   const init = useAuth(s => s.init);
+  const initTheme = useTheme(s => s.init);
 
-  // On first mount: if a token is in localStorage, hydrate the user
-  useEffect(() => { init(); }, [init]);
+  // On first mount: hydrate user from token + apply theme to DOM.
+  // The theme class is already set by the inline script in index.html
+  // (no-flash); this call just keeps the Zustand store in sync.
+  useEffect(() => { init(); initTheme(); }, [init, initTheme]);
 
   return (
     <Router basename={import.meta.env.BASE_URL}>
@@ -31,7 +35,10 @@ export default function App() {
           translations={translations}
         />
 
-        <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24">
+        {/* The shared layout: just top-padding to clear the fixed Navbar.
+            Each page sets its own max-width and horizontal padding — Home
+            uses full-width sections, app pages use a centered container. */}
+        <main className="pt-16">
           <Routes>
             <Route path="/" element={<Home t={t} />} />
             <Route path="/login" element={<Login />} />

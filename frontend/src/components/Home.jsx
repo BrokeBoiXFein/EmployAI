@@ -1,182 +1,397 @@
-import React from 'react';
-import { NavLink } from 'react-router-dom';
+// ============================================================
+// Home — public marketing page
+// ============================================================
+// Layout: full-width sections (App.jsx no longer wraps in a max-w
+// container). Each section sets its own background + container.
+// Both light and dark mode variants. Typography: EB Garamond serif
+// headings + Lato body — pulled from index.css's @import.
+// ============================================================
+
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
 import {
-    LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
-    BarChart, Bar, Cell
-} from 'recharts';
-import { Target, Users, TrendingUp, ShieldCheck, ArrowRight } from 'lucide-react';
+    ArrowRight, Check, ChevronRight, ExternalLink, Globe2, Sparkles, Briefcase,
+    Building, MapPin, DollarSign
+} from 'lucide-react';
+import { useAuth } from '../store/auth';
 
-const immigrationData = [
-    { year: '2013', arrivals: 990553 },
-    { year: '2014', arrivals: 1016518 },
-    { year: '2015', arrivals: 1051031 },
-    { year: '2016', arrivals: 1183505 },
-    { year: '2017', arrivals: 1127167 },
-    { year: '2018', arrivals: 1096611 },
-    { year: '2019', arrivals: 1031765 },
-    { year: '2020', arrivals: 707362 },
-    { year: '2021', arrivals: 740002 },
-    { year: '2022', arrivals: 1018303 },
-    { year: '2023', arrivals: 1100000 },
-];
+// Key for stashing the user's typed intent so the Analyzer can pick it up
+// after signup/login. Matches the constant the Analyzer reads from.
+const INTENT_KEY = 'employai_intent';
 
-const impactData = [
-    { name: 'Low Employment Rates', value: 80, color: '#f87171' },
-    { name: 'Persistent Vacancies', value: 65, color: '#f87171' },
-    { name: 'With EmployAI - Suitable Jobs', value: 92, color: '#4ade80' },
-    { name: 'With EmployAI - Inclusive Market', value: 88, color: '#4ade80' },
-];
+// Shared font-family hack — EB Garamond for serif headings, Lato everywhere else.
+// Tailwind v4 doesn't expose font-* utilities from CSS-only config, so we use
+// inline style for the few places we want the serif font.
+const SERIF = { fontFamily: '"EB Garamond", Georgia, serif', letterSpacing: '-0.01em' };
+const SANS  = { fontFamily: 'Lato, system-ui, sans-serif' };
 
-const Home = ({ t }) => {
+const Home = () => {
+    const user = useAuth(s => s.user);
+    const navigate = useNavigate();
+    const ctaHref = user ? '/analyze' : '/signup';
+    const ctaLabel = user ? 'Continue to Analyze' : 'Upload my resume — free';
+
+    // Controlled intent input. On submit we persist to localStorage and
+    // route to the CTA target. The Analyzer page picks it up on mount.
+    const [intent, setIntent] = useState(() => {
+        try { return localStorage.getItem(INTENT_KEY) || ''; } catch { return ''; }
+    });
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        const trimmed = intent.trim();
+        try {
+            if (trimmed) localStorage.setItem(INTENT_KEY, trimmed);
+            else localStorage.removeItem(INTENT_KEY);
+        } catch { /* private mode etc */ }
+        navigate(ctaHref);
+    };
+
     return (
-        <div className="space-y-16 pb-20">
-            {/* Hero Section */}
-            <section className="relative pt-8 pb-12 overflow-hidden text-center">
-                <div className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 pointer-events-none">
-                    <div className="absolute top-0 left-1/4 w-96 h-96 bg-indigo-600/20 rounded-full blur-[128px]" />
-                    <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-blue-600/10 rounded-full blur-[128px]" />
-                </div>
-                <div className="max-w-4xl mx-auto px-4">
-                    <h1 className="text-5xl md:text-7xl font-extrabold tracking-tight text-white mb-6 animate-in fade-in slide-in-from-bottom-4 duration-1000">
-                        EmployAI
+        // Override the inherited Inter body font for this whole page.
+        <div style={SANS} className="text-slate-800 dark:text-slate-200">
+
+            {/* ============================== HERO ============================== */}
+            <section className="relative overflow-hidden
+                                bg-white dark:bg-slate-950">
+                {/* Subtle dot-grid — light in light mode, even subtler in dark */}
+                <div className="absolute inset-0 pointer-events-none"
+                     style={{
+                         backgroundImage: 'radial-gradient(rgba(15, 23, 42, 0.08) 1px, transparent 1px)',
+                         backgroundSize: '22px 22px'
+                     }} />
+                <div className="absolute inset-0 pointer-events-none hidden dark:block"
+                     style={{
+                         backgroundImage: 'radial-gradient(rgba(125, 211, 252, 0.06) 1px, transparent 1px)',
+                         backgroundSize: '22px 22px'
+                     }} />
+
+                <div className="relative mx-auto max-w-6xl px-6 pt-16 pb-20 text-center">
+                    <span className="inline-block text-xs font-bold tracking-widest uppercase
+                                     text-sky-700 dark:text-sky-400 mb-5">
+                        Built for immigrants · Works in 6 languages
+                    </span>
+
+                    <h1 style={SERIF} className="text-5xl md:text-6xl lg:text-7xl font-medium leading-[1.05]
+                                                  text-slate-900 dark:text-white max-w-4xl mx-auto">
+                        The job market doesn't have to be confusing in a new country.
                     </h1>
-                    <p className="text-2xl md:text-3xl font-medium text-indigo-200/90 mb-8 italic">
-                        Connecting Global Talent with Local Opportunity
+
+                    <p className="mt-7 text-lg md:text-xl leading-relaxed max-w-2xl mx-auto
+                                  text-slate-600 dark:text-slate-400">
+                        Upload your resume in any language. EmployAI translates it, matches you to real US jobs, and coaches you toward better offers — for free.
                     </p>
-                    <div className="bg-white/5 backdrop-blur-md border border-white/10 p-8 rounded-3xl shadow-2xl">
-                        <h2 className="text-xl font-semibold text-indigo-300 mb-4 uppercase tracking-wider">Our Objective</h2>
-                        <p className="text-lg md:text-xl text-gray-200 leading-relaxed">
-                            To develop a conceptual AI tool that uses multilingual NLP and ethical safeguards to connect
-                            qualified immigrant job seekers with jobs and reduce structural labor market inefficiencies.
-                        </p>
-                    </div>
-                </div>
-            </section>
 
-            {/* The Problem & Stats */}
-            <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-                <div className="space-y-6">
-                    <h2 className="text-3xl font-bold text-white">The Challenge</h2>
-                    <div className="space-y-4 text-gray-300">
-                        <p className="flex items-start gap-3">
-                            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
-                            High immigration levels without effective integration mechanisms detrimentally affect the U.S.'s wellbeing.
-                        </p>
-                        <p className="flex items-start gap-3">
-                            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
-                            Many qualified immigrants remain excluded from formal employment pathways, leading to significant neglect of human capital.
-                        </p>
-                        <p className="flex items-start gap-3">
-                            <span className="mt-1.5 w-1.5 h-1.5 rounded-full bg-indigo-500 shrink-0" />
-                            Persistent labor shortages leave millions of positions unfilled, reducing employer productivity.
-                        </p>
-                    </div>
-                </div>
-
-                <div className="bg-white/5 border border-white/10 p-6 rounded-3xl h-[400px] flex flex-col">
-                    <h3 className="text-lg font-medium text-indigo-300 mb-2">Annual Authorized Immigrant Arrivals to the U.S.</h3>
-                    <ResponsiveContainer width="100%" height="80%">
-                        <LineChart data={immigrationData}>
-                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" />
-                            <XAxis dataKey="year" stroke="#94a3b8" fontSize={12} />
-                            <YAxis stroke="#94a3b8" fontSize={12} tickFormatter={(value) => `${value / 1000}k`} />
-                            <Tooltip
-                                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }}
-                                itemStyle={{ color: '#818cf8' }}
-                            />
-                            <Line type="monotone" dataKey="arrivals" stroke="#6366f1" strokeWidth={3} dot={{ fill: '#6366f1' }} activeDot={{ r: 8 }} />
-                        </LineChart>
-                    </ResponsiveContainer>
-                    <p className="text-[10px] text-gray-500 mt-2 text-right">
-                        Source: Department of Homeland Security / BLS Data Visualization 2024
-                    </p>
-                </div>
-            </section>
-
-            {/* Engineering Design / Methodology */}
-            <section>
-                <h2 className="text-3xl font-bold text-white mb-8 text-center">Our Methodology</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                    {[
-                        { icon: Users, title: "Structured Profile", desc: "Create a system profile mapping native-language skills to US standards." },
-                        { icon: TrendingUp, title: "NLP Translation", desc: "Advanced NLP translates and extracts key experience from multi-lingual resumes." },
-                        { icon: Target, title: "ML Matching", desc: "ML compares profiles with public labor databases to find the perfect fit." },
-                        { icon: ShieldCheck, title: "Built-in Safeguards", desc: "Bias auditing, anonymized data, and human oversight as core principles." }
-                    ].map((item, i) => (
-                        <div key={i} className="p-6 bg-white/5 border border-white/10 rounded-2xl hover:bg-white/10 transition-colors">
-                            <item.icon className="w-10 h-10 text-indigo-400 mb-4" />
-                            <h3 className="text-xl font-semibold text-white mb-2">{item.title}</h3>
-                            <p className="text-gray-400 text-sm">{item.desc}</p>
+                    {/* The input captures the user's intent — what they're looking
+                        for in their own words. We stash to localStorage on submit;
+                        the Analyzer reads it and blends with the resume embedding. */}
+                    <form onSubmit={handleSubmit}
+                          className="mt-10 max-w-2xl mx-auto rounded-2xl flex flex-col sm:flex-row items-stretch gap-2
+                                     bg-white dark:bg-slate-900
+                                     border border-slate-200 dark:border-slate-800 p-2">
+                        <div className="flex-1 flex items-center gap-3 px-4 py-3 min-w-0">
+                            <Sparkles className="w-5 h-5 shrink-0 text-slate-400 dark:text-slate-500" />
+                            <input type="text"
+                                   value={intent}
+                                   onChange={(e) => setIntent(e.target.value)}
+                                   placeholder="What kind of work are you looking for? (e.g. remote backend roles in fintech)"
+                                   className="flex-1 bg-transparent outline-none text-base
+                                              placeholder:text-slate-400 dark:placeholder:text-slate-500
+                                              text-slate-900 dark:text-white min-w-0" />
                         </div>
-                    ))}
+                        <button type="submit"
+                                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl font-bold transition-colors cursor-pointer
+                                           bg-green-600 hover:bg-green-700 text-white
+                                           dark:bg-green-600 dark:hover:bg-green-500">
+                            {ctaLabel}
+                            <ArrowRight className="w-4 h-4" />
+                        </button>
+                    </form>
+                    {intent.trim() && (
+                        <p className="mt-3 text-xs text-slate-500 dark:text-slate-500">
+                            We'll use that to bias your job matches.
+                        </p>
+                    )}
+
+                    {/* Popular role chips */}
+                    <div className="mt-5 text-sm flex items-center justify-center flex-wrap gap-x-3 gap-y-1
+                                    text-slate-500 dark:text-slate-500">
+                        <span>Popular:</span>
+                        <a href="#" className="text-sky-700 dark:text-sky-400 hover:underline">Software Engineer</a>
+                        <span className="text-slate-300 dark:text-slate-700">·</span>
+                        <a href="#" className="text-sky-700 dark:text-sky-400 hover:underline">Registered Nurse</a>
+                        <span className="text-slate-300 dark:text-slate-700">·</span>
+                        <a href="#" className="text-sky-700 dark:text-sky-400 hover:underline">Construction</a>
+                        <span className="text-slate-300 dark:text-slate-700">·</span>
+                        <a href="#" className="text-sky-700 dark:text-sky-400 hover:underline">Accounting</a>
+                    </div>
+
+                    {/* Trust strip */}
+                    <div className="mt-14 flex flex-wrap items-center justify-center gap-x-10 gap-y-4 text-sm
+                                    text-slate-600 dark:text-slate-400">
+                        <span className="flex items-center gap-2">
+                            <Check className="w-5 h-5 text-green-600 dark:text-green-500" />
+                            No fee. No credit card.
+                        </span>
+                        <span className="flex items-center gap-2">
+                            <Check className="w-5 h-5 text-green-600 dark:text-green-500" />
+                            Your resume stays private
+                        </span>
+                        <span className="flex items-center gap-2">
+                            <Check className="w-5 h-5 text-green-600 dark:text-green-500" />
+                            Works in any language
+                        </span>
+                    </div>
                 </div>
             </section>
 
-            {/* Future Impacts */}
-            <section className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
-                <div className="bg-white/5 border border-white/10 p-6 rounded-3xl h-[400px] order-2 lg:order-1 flex flex-col">
-                    <h3 className="text-lg font-medium text-indigo-300 mb-2">Projected Labor Market Integration Efficiency</h3>
-                    <ResponsiveContainer width="100%" height="80%">
-                        <BarChart data={impactData} layout="vertical">
-                            <CartesianGrid strokeDasharray="3 3" stroke="#ffffff10" horizontal={false} />
-                            <XAxis type="number" hide />
-                            <YAxis dataKey="name" type="category" stroke="#94a3b8" fontSize={10} width={150} />
-                            <Tooltip
-                                cursor={{ fill: 'transparent' }}
-                                contentStyle={{ backgroundColor: '#1e293b', border: '1px solid #334155', borderRadius: '12px' }}
-                            />
-                            <Bar dataKey="value" radius={[0, 4, 4, 0]}>
-                                {impactData.map((entry, index) => (
-                                    <Cell key={`cell-${index}`} fill={entry.color} />
-                                ))}
-                            </Bar>
-                        </BarChart>
-                    </ResponsiveContainer>
-                    <p className="text-[10px] text-gray-500 mt-2 text-left">
-                        Source: U.S. Bureau of Labor Statistics (JOLTS) / EmployAI Research 2024
-                    </p>
+            {/* ============================== HOW IT WORKS ============================== */}
+            <section id="how"
+                     className="border-y py-24
+                                bg-sky-50 border-slate-200
+                                dark:bg-slate-900 dark:border-slate-800">
+                <div className="mx-auto max-w-6xl px-6">
+                    <div className="text-center mb-14">
+                        <p className="text-sm font-bold tracking-widest uppercase text-sky-700 dark:text-sky-400">How it works</p>
+                        <h2 style={SERIF} className="text-4xl md:text-5xl font-medium mt-3 text-slate-900 dark:text-white">
+                            From your resume to your next job in three steps.
+                        </h2>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {[
+                            { n: '01', title: 'Upload, in any language', desc: 'Drop your resume — PDF, Word, or even a photo. We support Spanish, French, Arabic, Chinese, Hindi, and English. We translate and structure it automatically.' },
+                            { n: '02', title: 'See real matched jobs', desc: 'We compare your skills to live US job listings using meaning — not just keywords — so a payment-processing engineer in Argentina gets matched to fintech roles, not generic "engineer" results.' },
+                            { n: '03', title: 'Improve and apply', desc: 'Your AI coach suggests specific edits to make your resume stronger for US employers — and builds you a properly-formatted US version, ready to download.' }
+                        ].map((step) => (
+                            <div key={step.n}
+                                 className="border rounded-xl p-7
+                                            bg-white border-slate-200
+                                            dark:bg-slate-950/60 dark:border-slate-800">
+                                <div className="flex items-center gap-3 mb-4">
+                                    <span style={SERIF} className="text-3xl font-medium text-sky-700 dark:text-sky-400">{step.n}</span>
+                                    <div className="h-px flex-1 bg-slate-200 dark:bg-slate-800"></div>
+                                </div>
+                                <h3 style={SERIF} className="text-2xl font-medium mb-3 text-slate-900 dark:text-white">{step.title}</h3>
+                                <p className="leading-relaxed text-slate-600 dark:text-slate-400">{step.desc}</p>
+                            </div>
+                        ))}
+                    </div>
                 </div>
-                <div className="space-y-6 order-1 lg:order-2">
-                    <h2 className="text-3xl font-bold text-white">Future Impacts</h2>
-                    <div className="space-y-4 text-gray-300">
-                        <p className="flex items-center gap-3">
-                            <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
-                            Reduce "brain waste" by connecting workers to matching qualifications.
+            </section>
+
+            {/* ============================== FEATURE SPOTLIGHT ============================== */}
+            <section id="features" className="py-24 bg-white dark:bg-slate-950">
+                <div className="mx-auto max-w-6xl px-6 grid grid-cols-1 lg:grid-cols-2 gap-14 items-center">
+                    <div>
+                        <p className="text-sm font-bold tracking-widest uppercase text-sky-700 dark:text-sky-400">Real matching, not keyword soup</p>
+                        <h2 style={SERIF} className="text-4xl md:text-5xl font-medium mt-3 leading-tight text-slate-900 dark:text-white">
+                            See exactly how well each job fits your background — and why.
+                        </h2>
+                        <p className="mt-5 text-lg leading-relaxed text-slate-600 dark:text-slate-400">
+                            Most job sites rank by how recently the listing was posted, or how loudly the employer paid to be featured. EmployAI ranks by how well your skills and experience actually match the role.
                         </p>
-                        <p className="flex items-center gap-3">
-                            <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
-                            Address persistent labor shortages across critical sectors.
-                        </p>
-                        <p className="flex items-center gap-3">
-                            <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
-                            Minimize linguistic and structural barriers to employment access.
-                        </p>
-                        <p className="flex items-center gap-3">
-                            <span className="w-2 h-2 rounded-full bg-green-500 shrink-0" />
-                            Potential to serve refugees, asylum seekers, and marginalized groups.
+                        <ul className="mt-6 space-y-3 text-slate-700 dark:text-slate-300">
+                            <li className="flex gap-3">
+                                <Check className="w-5 h-5 text-green-600 dark:text-green-500 mt-0.5 shrink-0" />
+                                <span><b>Color-coded match scores</b> — see which jobs are worth your time at a glance.</span>
+                            </li>
+                            <li className="flex gap-3">
+                                <Check className="w-5 h-5 text-green-600 dark:text-green-500 mt-0.5 shrink-0" />
+                                <span><b>Watch scores rise</b> as you accept resume improvements.</span>
+                            </li>
+                            <li className="flex gap-3">
+                                <Check className="w-5 h-5 text-green-600 dark:text-green-500 mt-0.5 shrink-0" />
+                                <span><b>Save and track</b> applications through interview to offer.</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    {/* Stylized job-match preview card */}
+                    <div className="border rounded-2xl p-6
+                                    bg-sky-50 border-slate-200
+                                    dark:bg-slate-900 dark:border-slate-800">
+                        <p className="text-xs uppercase tracking-widest font-bold mb-4 text-slate-500">Top matches for you</p>
+                        <div className="space-y-3">
+                            <JobPreview title="Backend Engineer (Payments)" company="Stripe · Remote, US" salary="$140k–$190k" score={82} variant="green" />
+                            <JobPreview title="Software Engineer, Platform" company="Plaid · New York, NY" salary="$130k–$170k" score={71} variant="green" />
+                            <JobPreview title="Senior Software Developer" company="Block (Square) · San Francisco" salary="$155k–$210k" score={68} variant="sky" />
+                            <JobPreview title="Full-Stack Developer" company="Acme Health · Boston, MA" salary="$110k–$135k" score={52} variant="amber" dim />
+                        </div>
+                        <p className="mt-4 text-xs text-center text-slate-500">
+                            Live preview · scored in seconds.
                         </p>
                     </div>
                 </div>
             </section>
 
-            {/* CTA Section */}
-            <section className="text-center pt-8">
-                <div className="p-12 bg-gradient-to-br from-indigo-600/20 to-blue-600/20 rounded-[3rem] border border-white/10 backdrop-blur-sm">
-                    <h2 className="text-3xl md:text-4xl font-bold text-white mb-6">Ready to find your match?</h2>
-                    <p className="text-gray-300 mb-10 max-w-2xl mx-auto">
-                        Upload your resume and let our AI-powered framework connect you with opportunities that match your global expertise.
+            {/* ============================== LANGUAGES ============================== */}
+            <section id="languages"
+                     className="border-y py-20
+                                bg-sky-50 border-slate-200
+                                dark:bg-slate-900 dark:border-slate-800">
+                <div className="mx-auto max-w-6xl px-6 text-center">
+                    <p className="text-sm font-bold tracking-widest uppercase text-sky-700 dark:text-sky-400">Languages we speak</p>
+                    <h2 style={SERIF} className="text-4xl md:text-5xl font-medium mt-3 text-slate-900 dark:text-white">
+                        Upload your resume in the language it was written in.
+                    </h2>
+                    <p className="mt-5 text-lg max-w-2xl mx-auto text-slate-600 dark:text-slate-400">
+                        Six languages today. More on the way as we hear from job seekers around the world.
                     </p>
-                    <NavLink
-                        to="/analyze"
-                        className="inline-flex items-center gap-2 bg-gradient-to-r from-indigo-600 to-blue-600 hover:from-indigo-500 hover:to-blue-500 text-white font-bold py-4 px-10 rounded-2xl shadow-xl shadow-indigo-900/40 transition-all hover:scale-105 active:scale-95 group"
-                    >
-                        Start Analysis
-                        <ArrowRight className="w-5 h-5 transition-transform group-hover:translate-x-1" />
-                    </NavLink>
+                    <div className="mt-12 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4 max-w-4xl mx-auto">
+                        {[
+                            { native: 'English', en: 'English' },
+                            { native: 'Español', en: 'Spanish' },
+                            { native: 'Français', en: 'French' },
+                            { native: 'العربية', en: 'Arabic' },
+                            { native: '中文', en: 'Chinese' },
+                            { native: 'हिन्दी', en: 'Hindi' }
+                        ].map(l => (
+                            <div key={l.en}
+                                 className="border rounded-xl py-5 px-3
+                                            bg-white border-slate-200
+                                            dark:bg-slate-950/60 dark:border-slate-800">
+                                <p style={SERIF} className="text-xl font-medium text-slate-900 dark:text-white">{l.native}</p>
+                                <p className="text-xs mt-1 text-slate-500">{l.en}</p>
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </section>
+
+            {/* ============================== STORIES (placeholder portraits) ============================== */}
+            <section id="stories" className="py-24 bg-white dark:bg-slate-950">
+                <div className="mx-auto max-w-6xl px-6">
+                    <div className="text-center mb-14">
+                        <p className="text-sm font-bold tracking-widest uppercase text-sky-700 dark:text-sky-400">Stories</p>
+                        <h2 style={SERIF} className="text-4xl md:text-5xl font-medium mt-3 text-slate-900 dark:text-white">From qualified — to hired.</h2>
+                    </div>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <Story initials="MR" bg="bg-sky-700" name="Maria R." role="Registered Nurse · Houston, TX"
+                               quote="My nursing license was from Mexico. EmployAI mapped it to its US equivalent and matched me with a clinic that wanted exactly my experience." />
+                        <Story initials="AK" bg="bg-slate-800" name="Ahmad K." role="Civil Engineer · Detroit, MI"
+                               quote="I uploaded my CV in Arabic and got my first three interviews within a week. Nobody else was matching me on what I could actually do." />
+                        <Story initials="LZ" bg="bg-green-700" name="Linh Z." role="Data Analyst · Seattle, WA"
+                               quote="The resume coach told me which bullets to rewrite and why. My top match jumped from 51% to 78% in an afternoon." />
+                    </div>
+                    <p className="text-center text-xs text-slate-500 dark:text-slate-600 mt-8 italic">
+                        Stories above use placeholder portraits — real testimonials and photos coming as the platform grows.
+                    </p>
+                </div>
+            </section>
+
+            {/* ============================== FINAL CTA ============================== */}
+            <section className="bg-sky-700 dark:bg-sky-800 text-white">
+                <div className="mx-auto max-w-4xl px-6 py-20 text-center">
+                    <h2 style={SERIF} className="text-4xl md:text-5xl font-medium leading-tight">
+                        Start with your resume. We'll handle the rest.
+                    </h2>
+                    <p className="mt-5 text-lg max-w-2xl mx-auto text-sky-100">
+                        Free to use. Available in six languages. Nothing to install.
+                    </p>
+                    <div className="mt-8 flex flex-col sm:flex-row gap-3 justify-center">
+                        <Link to={ctaHref}
+                              className="inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-md font-bold transition-colors
+                                         bg-green-500 hover:bg-green-400 text-slate-950">
+                            {ctaLabel}
+                            <ArrowRight className="w-4 h-4" />
+                        </Link>
+                        <a href="#how"
+                           className="inline-flex items-center justify-center px-7 py-3.5 rounded-md font-semibold border border-white/30 hover:border-white text-white/90 hover:text-white transition-colors">
+                            See how it works
+                        </a>
+                    </div>
+                </div>
+            </section>
+
+            {/* ============================== FOOTER ============================== */}
+            <footer className="bg-slate-900 dark:bg-slate-950 text-slate-300 border-t border-slate-800">
+                <div className="mx-auto max-w-7xl px-6 py-14 grid grid-cols-2 md:grid-cols-4 gap-8 text-sm">
+                    <div className="col-span-2">
+                        <div className="flex items-center gap-2 mb-3">
+                            <span className="inline-flex h-8 w-8 items-center justify-center rounded-md bg-white text-slate-900 font-bold">E</span>
+                            <span className="text-lg font-bold text-white">EmployAI</span>
+                        </div>
+                        <p className="leading-relaxed max-w-sm">
+                            A multilingual AI job-search platform built for immigrants navigating the US labor market. Free, private, and human-friendly.
+                        </p>
+                    </div>
+                    <div>
+                        <p className="text-white font-bold mb-3">Product</p>
+                        <ul className="space-y-2">
+                            <li><a href="#how" className="hover:text-white transition-colors">How it works</a></li>
+                            <li><Link to="/editor" className="hover:text-white transition-colors">Resume Studio</Link></li>
+                            <li><Link to="/analyze" className="hover:text-white transition-colors">Job matching</Link></li>
+                            <li><Link to="/jobs" className="hover:text-white transition-colors">Application tracking</Link></li>
+                        </ul>
+                    </div>
+                    <div>
+                        <p className="text-white font-bold mb-3">About</p>
+                        <ul className="space-y-2">
+                            <li><a href="#" className="hover:text-white transition-colors">The team</a></li>
+                            <li><a href="#" className="hover:text-white transition-colors">Mission</a></li>
+                            <li><a href="#" className="hover:text-white transition-colors">Privacy</a></li>
+                            <li><a href="https://github.com/BrokeBoiXFein/EmployAI" target="_blank" rel="noopener noreferrer" className="hover:text-white transition-colors inline-flex items-center gap-1">GitHub <ExternalLink className="w-3 h-3" /></a></li>
+                        </ul>
+                    </div>
+                </div>
+                <div className="border-t border-slate-800">
+                    <p className="mx-auto max-w-7xl px-6 py-5 text-xs text-slate-500">
+                        © {new Date().getFullYear()} EmployAI — Jericho Senior High School project. Not a legal employer or licensed immigration service.
+                    </p>
+                </div>
+            </footer>
         </div>
     );
 };
+
+// ------------------------------------------------------------
+// Sub-components — kept inline since they're only used here
+// ------------------------------------------------------------
+
+const SCORE_VARIANTS = {
+    green: 'bg-green-600 text-white',
+    sky:   'bg-sky-600 text-white',
+    amber: 'bg-amber-500 text-white'
+};
+
+function JobPreview({ title, company, salary, score, variant, dim }) {
+    return (
+        <div className={`flex items-start justify-between gap-3 p-4 rounded-xl border
+                         bg-white border-slate-200
+                         dark:bg-slate-950/60 dark:border-slate-800
+                         ${dim ? 'opacity-80' : ''}`}>
+            <div className="min-w-0">
+                <p className="font-bold text-slate-900 dark:text-white">{title}</p>
+                <p className="text-sm text-slate-600 dark:text-slate-400">{company}</p>
+                <p className="text-xs mt-1 text-slate-500">{salary}</p>
+            </div>
+            <span className={`shrink-0 text-xs font-bold px-2.5 py-1 rounded-full ${SCORE_VARIANTS[variant] || SCORE_VARIANTS.green}`}>
+                {score}% match
+            </span>
+        </div>
+    );
+}
+
+function Story({ initials, bg, name, role, quote }) {
+    return (
+        <article className="border rounded-xl overflow-hidden flex flex-col
+                            bg-white border-slate-200
+                            dark:bg-slate-900 dark:border-slate-800">
+            <div className="aspect-[4/3] flex items-center justify-center
+                            bg-sky-100 dark:bg-slate-800">
+                <span style={{ fontFamily: '"EB Garamond", Georgia, serif' }}
+                      className={`h-24 w-24 rounded-full ${bg} text-white inline-flex items-center justify-center text-2xl font-bold`}>
+                    {initials}
+                </span>
+            </div>
+            <div className="p-6">
+                <p className="text-base leading-relaxed text-slate-900 dark:text-slate-100">"{quote}"</p>
+                <p className="mt-4 text-sm font-bold text-slate-900 dark:text-white">{name}</p>
+                <p className="text-xs text-slate-500">{role}</p>
+            </div>
+        </article>
+    );
+}
 
 export default Home;

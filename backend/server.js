@@ -63,9 +63,33 @@ app.use('/api/applications', applicationRoutes); // application tracking
 //   6. Score each job: cosine(resume_vec, job_vec) → number in [-1, 1]
 //   7. Sort by score descending, attach matchScore, return
 // ------------------------------------------------------------
+// Blend a resume vector with an optional intent vector. Both must be
+// L2-normalized. Returns an L2-normalized result so cosine = dot.
+//
+// Why 0.7/0.3? The resume is what the candidate CAN do. The intent is
+// what they SAY they want. We weight skills heavier than intent because:
+//   - intent is often vaguer (typed in 5 seconds)
+//   - skills are verifiable, intent isn't
+//   - we still want to bias toward what they typed, but not overpower
+//     the actual qualifications. 70/30 hits that balance in practice.
+function blendVectors(resumeVec, intentVec, intentWeight = 0.3) {
+  if (!intentVec) return resumeVec;
+  const w = Math.max(0, Math.min(1, intentWeight));
+  const blended = new Array(resumeVec.length);
+  let sumSq = 0;
+  for (let i = 0; i < resumeVec.length; i++) {
+    const v = (1 - w) * resumeVec[i] + w * intentVec[i];
+    blended[i] = v;
+    sumSq += v * v;
+  }
+  const norm = Math.sqrt(sumSq) || 1;
+  for (let i = 0; i < blended.length; i++) blended[i] /= norm;
+  return blended;
+}
+
 app.post('/api/search-jobs', requireAuth, async (req, res) => {
   try {
-    const { resumeId } = req.body || {};
+    const { resumeId, focusText } = req.body || {};
     if (!resumeId) return res.status(400).json({ error: 'resumeId required' });
 
     // Step 1: ownership-checked fetch
@@ -80,9 +104,6 @@ app.post('/api/search-jobs', requireAuth, async (req, res) => {
     }
 
     // Step 2: backfill embedding if missing OR wrong dimensions.
-    // The dim check catches stale 384-dim vectors left over from when
-    // we used local sentence-transformers — those can't be compared to
-    // current 768-dim Gemini vectors and would silently score 0.
     let resumeVec = resume.embedding;
     if (!resumeVec || resumeVec.length !== VECTOR_DIM) {
       console.log(`[search-jobs] (Re)computing embedding for resume ${resume.id}`);
@@ -91,6 +112,20 @@ app.post('/api/search-jobs', requireAuth, async (req, res) => {
         where: { id: resume.id },
         data: { embedding: resumeVec }
       });
+    }
+
+    // Step 2b: if the user typed an intent on the Home page, embed it
+    // and blend with the resume vector. Lets the same resume produce
+    // different rankings based on "what am I looking for right now."
+    const trimmedFocus = (focusText || '').trim();
+    let queryVec = resumeVec;
+    if (trimmedFocus) {
+      try {
+        const intentVec = await embedText(trimmedFocus);
+        queryVec = blendVectors(resumeVec, intentVec, 0.3);
+      } catch (e) {
+        console.warn('Intent embed failed, falling back to resume-only:', e.message);
+      }
     }
 
     // Step 3: fetch jobs from Adzuna (up to 3 titles * 10 results = 30 jobs)
@@ -116,15 +151,19 @@ app.post('/api/search-jobs', requireAuth, async (req, res) => {
     const jobTexts = uniqueJobs.map(buildJobText);
     const jobVecs = await embedTexts(jobTexts);
 
-    // Step 6: score each job
+    // Step 6: score each job against the blended query vector
     const scored = uniqueJobs.map((job, i) => ({
       ...job,
-      matchScore: cosineSimilarity(resumeVec, jobVecs[i])
+      matchScore: cosineSimilarity(queryVec, jobVecs[i])
     }));
 
     // Step 7: sort by score desc, take top 15
     scored.sort((a, b) => b.matchScore - a.matchScore);
-    res.json({ success: true, jobs: scored.slice(0, 15) });
+    res.json({
+      success: true,
+      jobs: scored.slice(0, 15),
+      appliedFocus: trimmedFocus || null
+    });
   } catch (error) {
     console.error('Job search error:', error);
     res.status(500).json({ success: false, error: error.message || 'Failed to search jobs' });

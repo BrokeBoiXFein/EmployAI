@@ -1,0 +1,376 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>EmployAI — Analyze (Dark mode)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond:wght@400;500;600;700&family=Lato:wght@300;400;700;900&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['"EB Garamond"', 'Georgia', 'serif'],
+            sans:  ['Lato', 'system-ui', 'sans-serif']
+          },
+          colors: {
+            // Same brand colors, slightly shifted for dark-mode visibility
+            ink:   { 900: '#0C4A6E', 700: '#155E75', 500: '#0EA5E9', 300: '#38BDF8', 100: '#BAE6FD' },
+            grass: { 700: '#15803D', 600: '#16A34A', 500: '#22C55E', 400: '#4ADE80' }
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Lato', system-ui, sans-serif;
+      background: #020617;        /* slate-950 */
+      color: #E2E8F0;             /* slate-200 */
+    }
+    .h-serif { font-family: 'EB Garamond', Georgia, serif; letter-spacing: -0.01em; }
+    /* Subtle hairline-grid background on body for dark-mode depth without gradients */
+    body {
+      background-image:
+        radial-gradient(rgba(56, 189, 248, 0.04) 1px, transparent 1px);
+      background-size: 36px 36px;
+    }
+    @media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+  </style>
+</head>
+
+<body class="antialiased">
+
+<!-- ============================================================ -->
+<!-- NAVBAR (dark)                                                 -->
+<!-- ============================================================ -->
+<header class="border-b border-slate-800 bg-slate-900/80 backdrop-blur-sm">
+  <div class="mx-auto max-w-7xl px-6 py-3.5 flex items-center justify-between">
+    <a href="#" class="flex items-center gap-2">
+      <span class="inline-flex h-9 w-9 items-center justify-center rounded-md bg-ink-500 text-slate-950 font-bold text-lg">E</span>
+      <span class="text-xl font-bold tracking-tight text-white">EmployAI</span>
+    </a>
+    <nav class="hidden md:flex items-center gap-2 text-sm font-medium">
+      <a href="#" class="px-3 py-1.5 rounded-md text-slate-300 hover:text-white hover:bg-slate-800 transition-colors">Home</a>
+      <a href="#" class="px-3 py-1.5 rounded-md text-slate-950 bg-ink-500 hover:bg-ink-300 transition-colors font-bold">Analyze</a>
+      <a href="#" class="px-3 py-1.5 rounded-md text-slate-300 hover:text-white hover:bg-slate-800 transition-colors">Studio</a>
+      <a href="#" class="px-3 py-1.5 rounded-md text-slate-300 hover:text-white hover:bg-slate-800 transition-colors">Resumes</a>
+      <a href="#" class="px-3 py-1.5 rounded-md text-slate-300 hover:text-white hover:bg-slate-800 transition-colors">Jobs</a>
+    </nav>
+    <div class="flex items-center gap-3">
+      <!-- Theme toggle (decorative for this preview) -->
+      <button class="inline-flex items-center justify-center h-9 w-9 rounded-md text-slate-400 hover:text-amber-300 hover:bg-slate-800 transition-colors cursor-pointer" aria-label="Toggle theme">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+      </button>
+      <span class="inline-flex items-center gap-2 text-sm text-slate-300">
+        <span class="h-8 w-8 rounded-full bg-ink-500 text-slate-950 inline-flex items-center justify-center text-xs font-bold">AK</span>
+        <span class="hidden sm:inline">Ayaan</span>
+      </span>
+    </div>
+  </div>
+</header>
+
+<!-- ============================================================ -->
+<!-- WORKSPACE TOOLBAR (sticky, dark)                              -->
+<!-- ============================================================ -->
+<div class="sticky top-0 z-30 bg-slate-900/95 backdrop-blur-sm border-b border-slate-800">
+  <div class="mx-auto max-w-7xl px-6 py-3 flex flex-wrap items-center gap-3">
+    <div class="flex items-center gap-2">
+      <span class="text-xs uppercase tracking-widest font-bold text-slate-500">Active resume</span>
+      <div class="relative">
+        <select class="appearance-none bg-slate-800 border border-slate-700 rounded-md pl-3 pr-9 py-2 text-sm font-medium text-white focus:outline-none focus:ring-2 focus:ring-ink-500 cursor-pointer">
+          <option>Software Engineer · v3</option>
+          <option>Healthcare Resume</option>
+          <option>Customer Service Resume</option>
+        </select>
+        <svg class="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 pointer-events-none" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+      </div>
+    </div>
+
+    <span class="hidden md:inline-block h-6 w-px bg-slate-800"></span>
+
+    <div class="hidden md:flex items-center gap-5 text-sm text-slate-400">
+      <span><span class="text-grass-400 font-bold">82%</span> top match</span>
+      <span><span class="text-white font-bold">14</span> jobs</span>
+      <span><span class="text-white font-bold">3</span> saved</span>
+    </div>
+
+    <div class="flex-1"></div>
+
+    <div class="flex items-center gap-2">
+      <button class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-300 hover:text-white px-3 py-2 rounded-md hover:bg-slate-800 transition-colors cursor-pointer">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 1 1-3-6.7L21 8"/><path d="M21 3v5h-5"/></svg>
+        Re-run search
+      </button>
+      <button class="inline-flex items-center gap-1.5 text-sm font-bold text-slate-950 bg-grass-500 hover:bg-grass-400 px-3.5 py-2 rounded-md transition-colors cursor-pointer">
+        <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 4V2M15 16v-2M8 9h2M20 9h2M17.8 11.8L19 13M15 9h0M17.8 6.2L19 5M3 21l9-9M12.2 6.2L11 5"/></svg>
+        Build US Resume
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- MAIN WORKSPACE                                                -->
+<!-- ============================================================ -->
+<main class="mx-auto max-w-7xl px-6 py-8">
+  <div class="grid grid-cols-1 lg:grid-cols-[420px_1fr] gap-6">
+
+    <!-- LEFT: RESUME PROFILE -->
+    <aside class="bg-slate-900 border border-slate-800 rounded-xl overflow-hidden lg:sticky lg:top-[68px] lg:self-start">
+      <div class="px-6 pt-6 pb-5 border-b border-slate-800">
+        <p class="text-xs uppercase tracking-widest font-bold text-ink-300 mb-1">Your profile</p>
+        <h1 class="h-serif text-3xl font-medium text-white leading-tight">Mateo Álvarez</h1>
+        <p class="text-sm text-slate-500 mt-0.5">Resume originally in <span class="font-medium text-slate-300">Spanish</span> · translated automatically</p>
+      </div>
+
+      <section class="px-6 py-5 border-b border-slate-800">
+        <h2 class="text-xs uppercase tracking-widest font-bold text-slate-500 mb-2">Summary</h2>
+        <p class="text-[15px] text-slate-200 leading-relaxed">Backend engineer with 7 years building payment-processing and fintech systems at Latin America's largest e-commerce platforms. Specialized in distributed systems, high-throughput APIs, and PCI-compliant data flows.</p>
+      </section>
+
+      <section class="px-6 py-5 border-b border-slate-800">
+        <h2 class="text-xs uppercase tracking-widest font-bold text-slate-500 mb-3">Target US roles</h2>
+        <div class="flex flex-wrap gap-1.5">
+          <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-ink-500/15 border border-ink-500/40 text-xs font-bold text-ink-300">Backend Engineer</span>
+          <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-ink-500/15 border border-ink-500/40 text-xs font-bold text-ink-300">Software Engineer, Payments</span>
+          <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-ink-500/15 border border-ink-500/40 text-xs font-bold text-ink-300">Platform Engineer</span>
+        </div>
+      </section>
+
+      <section class="px-6 py-5 border-b border-slate-800">
+        <h2 class="text-xs uppercase tracking-widest font-bold text-slate-500 mb-3">Skills</h2>
+        <div class="flex flex-wrap gap-1.5">
+          <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-800 border border-slate-700 text-xs text-slate-300">Python</span>
+          <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-800 border border-slate-700 text-xs text-slate-300">Go</span>
+          <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-800 border border-slate-700 text-xs text-slate-300">PostgreSQL</span>
+          <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-800 border border-slate-700 text-xs text-slate-300">Kafka</span>
+          <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-800 border border-slate-700 text-xs text-slate-300">AWS</span>
+          <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-800 border border-slate-700 text-xs text-slate-300">Kubernetes</span>
+          <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-800 border border-slate-700 text-xs text-slate-300">PCI-DSS</span>
+          <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-800 border border-slate-700 text-xs text-slate-300">Distributed systems</span>
+          <span class="inline-flex items-center px-2.5 py-1 rounded-md bg-slate-800 border border-slate-700 text-xs text-slate-300">REST / gRPC</span>
+        </div>
+      </section>
+
+      <section class="px-6 py-5 border-b border-slate-800">
+        <h2 class="text-xs uppercase tracking-widest font-bold text-slate-500 mb-3">Experience</h2>
+        <ol class="space-y-4">
+          <li class="border-l-2 border-ink-500/60 pl-3">
+            <p class="text-[15px] font-bold text-white">Senior Backend Engineer</p>
+            <p class="text-xs text-slate-500">Mercado Libre · Buenos Aires · 2021 – Present</p>
+            <p class="text-sm text-slate-300 mt-1.5 leading-relaxed">Led a 5-person team rebuilding the payments orchestrator handling 2,500 TPS across LATAM.</p>
+          </li>
+          <li class="border-l-2 border-slate-700 pl-3">
+            <p class="text-[15px] font-bold text-white">Backend Engineer</p>
+            <p class="text-xs text-slate-500">Globant · Buenos Aires · 2018 – 2021</p>
+            <p class="text-sm text-slate-300 mt-1.5 leading-relaxed">Designed PCI-compliant card-vaulting service for three banking clients.</p>
+          </li>
+          <li class="border-l-2 border-slate-700 pl-3">
+            <p class="text-[15px] font-bold text-white">Software Developer</p>
+            <p class="text-xs text-slate-500">Banco Galicia · Buenos Aires · 2016 – 2018</p>
+          </li>
+        </ol>
+      </section>
+
+      <section class="px-6 py-5">
+        <h2 class="text-xs uppercase tracking-widest font-bold text-slate-500 mb-3">Education</h2>
+        <p class="text-[15px] font-bold text-white">Licenciatura en Sistemas de Información</p>
+        <p class="text-xs text-slate-500">Universidad de Buenos Aires · 2016</p>
+        <div class="mt-3 p-3 bg-ink-500/10 border border-ink-500/30 rounded-md">
+          <p class="text-xs font-bold text-ink-300 uppercase tracking-widest mb-1">US equivalent</p>
+          <p class="text-sm text-white">B.S. in Information Systems (4-year)</p>
+        </div>
+      </section>
+
+      <div class="px-6 py-4 bg-slate-800/50 border-t border-slate-800">
+        <a href="#" class="inline-flex items-center gap-1.5 text-sm font-bold text-ink-300 hover:text-white transition-colors cursor-pointer">
+          Improve this resume in the Studio
+          <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 5l7 7-7 7"/></svg>
+        </a>
+      </div>
+    </aside>
+
+    <!-- RIGHT: JOB MATCHES -->
+    <section>
+      <div class="flex items-end justify-between mb-4">
+        <div>
+          <h2 class="h-serif text-3xl font-medium text-white leading-tight">Matched jobs</h2>
+          <p class="text-sm text-slate-400 mt-1">Ranked by how well each job fits your background, not by who paid to be promoted.</p>
+        </div>
+        <div class="hidden sm:flex items-center gap-1 text-xs">
+          <button class="px-2.5 py-1.5 rounded-md font-medium text-slate-950 bg-ink-500">Best match</button>
+          <button class="px-2.5 py-1.5 rounded-md font-medium text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer">Most recent</button>
+          <button class="px-2.5 py-1.5 rounded-md font-medium text-slate-400 hover:text-white hover:bg-slate-800 cursor-pointer">Highest pay</button>
+        </div>
+      </div>
+
+      <div class="mb-3 flex flex-wrap items-center gap-2 text-xs">
+        <span class="font-bold uppercase tracking-widest text-slate-500">Filters:</span>
+        <button class="inline-flex items-center gap-1 bg-slate-900 border border-slate-700 text-slate-300 rounded-full px-3 py-1 hover:border-ink-500 transition-colors cursor-pointer">Remote</button>
+        <button class="inline-flex items-center gap-1 bg-slate-900 border border-slate-700 text-slate-300 rounded-full px-3 py-1 hover:border-ink-500 transition-colors cursor-pointer">Full-time</button>
+        <button class="inline-flex items-center gap-1 bg-slate-900 border border-slate-700 text-slate-300 rounded-full px-3 py-1 hover:border-ink-500 transition-colors cursor-pointer">$100k+</button>
+        <button class="inline-flex items-center gap-1 bg-slate-900 border border-slate-700 text-slate-300 rounded-full px-3 py-1 hover:border-ink-500 transition-colors cursor-pointer">+ Add filter</button>
+      </div>
+
+      <div class="space-y-3">
+
+        <!-- Job 1 — strong match (green) -->
+        <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-colors">
+          <div class="flex items-start gap-4">
+            <div class="h-12 w-12 rounded-md bg-slate-100 text-slate-950 inline-flex items-center justify-center font-bold text-lg shrink-0">S</div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="text-lg font-bold text-white">Backend Engineer, Payments</p>
+                  <p class="text-sm text-slate-400">Stripe · Remote (US)</p>
+                </div>
+                <span class="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-grass-500/15 border border-grass-500/40 text-grass-400 text-xs font-bold">
+                  <span class="h-1.5 w-1.5 rounded-full bg-grass-500"></span>
+                  82% match
+                </span>
+              </div>
+              <p class="text-sm text-slate-300 mt-2 leading-relaxed">Build the next generation of Stripe's payments infrastructure. Looking for engineers with experience scaling high-throughput, PCI-compliant systems in LATAM, EU, or US markets.</p>
+              <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-400">
+                <span class="flex items-center gap-1"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 0 1 0 20M12 2a15 15 0 0 0 0 20"/></svg> Remote (US)</span>
+                <span class="flex items-center gap-1 font-semibold text-grass-400"><svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg> $145k–$195k</span>
+                <span class="text-slate-500">Posted 2 days ago</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-slate-800 flex items-center gap-2">
+            <a href="#" class="inline-flex items-center gap-1.5 text-sm font-bold text-slate-950 bg-ink-500 hover:bg-ink-300 px-4 py-2 rounded-md transition-colors cursor-pointer">
+              View job
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M7 7h10v10"/></svg>
+            </a>
+            <button class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 px-3 py-2 rounded-md transition-colors cursor-pointer">
+              Mark applied
+            </button>
+            <div class="flex-1"></div>
+            <button class="inline-flex items-center justify-center h-9 w-9 rounded-md text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer" aria-label="Save job">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9-9c-1-2.5 1-6 4.5-6 2 0 3 1.2 4.5 3 1.5-1.8 2.5-3 4.5-3 3.5 0 5.5 3.5 4.5 6-2 4.5-9 9-9 9z"/></svg>
+            </button>
+          </div>
+        </article>
+
+        <!-- Job 2 — strong match (green), already applied + saved -->
+        <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-colors">
+          <div class="flex items-start gap-4">
+            <div class="h-12 w-12 rounded-md bg-ink-500 text-slate-950 inline-flex items-center justify-center font-bold text-lg shrink-0">P</div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="text-lg font-bold text-white">Software Engineer, Platform</p>
+                  <p class="text-sm text-slate-400">Plaid · New York, NY (Hybrid)</p>
+                </div>
+                <span class="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-grass-500/15 border border-grass-500/40 text-grass-400 text-xs font-bold">
+                  <span class="h-1.5 w-1.5 rounded-full bg-grass-500"></span>
+                  76% match
+                </span>
+              </div>
+              <p class="text-sm text-slate-300 mt-2 leading-relaxed">Help build the financial infrastructure that powers thousands of fintech apps. Strong fit if you have payments / banking backend experience.</p>
+              <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-400">
+                <span>New York, NY</span>
+                <span class="font-semibold text-grass-400">$135k–$175k</span>
+                <span class="text-slate-500">Posted 1 week ago</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-slate-800 flex items-center gap-2">
+            <a href="#" class="inline-flex items-center gap-1.5 text-sm font-bold text-slate-950 bg-ink-500 hover:bg-ink-300 px-4 py-2 rounded-md transition-colors cursor-pointer">View job <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M7 7h10v10"/></svg></a>
+            <span class="inline-flex items-center gap-1.5 text-sm font-bold text-grass-400 bg-grass-500/15 border border-grass-500/40 px-3 py-2 rounded-md">
+              <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg>
+              Applied
+            </span>
+            <div class="flex-1"></div>
+            <button class="inline-flex items-center justify-center h-9 w-9 rounded-md text-rose-400 bg-rose-500/10 hover:bg-rose-500/20 transition-colors cursor-pointer" aria-label="Saved">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9-9c-1-2.5 1-6 4.5-6 2 0 3 1.2 4.5 3 1.5-1.8 2.5-3 4.5-3 3.5 0 5.5 3.5 4.5 6-2 4.5-9 9-9 9z"/></svg>
+            </button>
+          </div>
+        </article>
+
+        <!-- Job 3 — good match (blue) -->
+        <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-colors">
+          <div class="flex items-start gap-4">
+            <div class="h-12 w-12 rounded-md bg-slate-700 text-white inline-flex items-center justify-center font-bold text-lg shrink-0">B</div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="text-lg font-bold text-white">Senior Software Developer</p>
+                  <p class="text-sm text-slate-400">Block (Square) · San Francisco, CA</p>
+                </div>
+                <span class="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-ink-500/15 border border-ink-500/40 text-ink-300 text-xs font-bold">
+                  <span class="h-1.5 w-1.5 rounded-full bg-ink-500"></span>
+                  68% match
+                </span>
+              </div>
+              <p class="text-sm text-slate-300 mt-2 leading-relaxed">Work on merchant-side payment systems for Square's hardware ecosystem. Solid backend role at scale.</p>
+              <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-400">
+                <span>San Francisco, CA</span>
+                <span class="font-semibold text-grass-400">$155k–$210k</span>
+                <span class="text-slate-500">Posted 3 days ago</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-slate-800 flex items-center gap-2">
+            <a href="#" class="inline-flex items-center gap-1.5 text-sm font-bold text-slate-950 bg-ink-500 hover:bg-ink-300 px-4 py-2 rounded-md transition-colors cursor-pointer">View job <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M7 7h10v10"/></svg></a>
+            <button class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 px-3 py-2 rounded-md transition-colors cursor-pointer">Mark applied</button>
+            <div class="flex-1"></div>
+            <button class="inline-flex items-center justify-center h-9 w-9 rounded-md text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer" aria-label="Save job">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9-9c-1-2.5 1-6 4.5-6 2 0 3 1.2 4.5 3 1.5-1.8 2.5-3 4.5-3 3.5 0 5.5 3.5 4.5 6-2 4.5-9 9-9 9z"/></svg>
+            </button>
+          </div>
+        </article>
+
+        <!-- Job 4 — amber match -->
+        <article class="bg-slate-900 border border-slate-800 rounded-xl p-5 hover:border-slate-700 transition-colors">
+          <div class="flex items-start gap-4">
+            <div class="h-12 w-12 rounded-md bg-amber-600 text-white inline-flex items-center justify-center font-bold text-lg shrink-0">A</div>
+            <div class="flex-1 min-w-0">
+              <div class="flex items-start justify-between gap-3">
+                <div class="min-w-0">
+                  <p class="text-lg font-bold text-white">Full-Stack Developer</p>
+                  <p class="text-sm text-slate-400">Acme Health · Boston, MA</p>
+                </div>
+                <span class="shrink-0 inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-500/15 border border-amber-500/40 text-amber-300 text-xs font-bold">
+                  <span class="h-1.5 w-1.5 rounded-full bg-amber-500"></span>
+                  51% match
+                </span>
+              </div>
+              <p class="text-sm text-slate-300 mt-2 leading-relaxed">Healthcare SaaS for hospital administrators. Backend work overlaps but no payments focus — you might be overqualified on infra and under-positioned on healthcare domain.</p>
+              <div class="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-xs text-slate-400">
+                <span>Boston, MA</span>
+                <span class="font-semibold text-slate-300">$110k–$135k</span>
+                <span class="text-slate-500">Posted yesterday</span>
+              </div>
+            </div>
+          </div>
+          <div class="mt-4 pt-4 border-t border-slate-800 flex items-center gap-2">
+            <a href="#" class="inline-flex items-center gap-1.5 text-sm font-bold text-slate-950 bg-ink-500 hover:bg-ink-300 px-4 py-2 rounded-md transition-colors cursor-pointer">View job <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M7 17L17 7M7 7h10v10"/></svg></a>
+            <button class="inline-flex items-center gap-1.5 text-sm font-medium text-slate-300 hover:text-white hover:bg-slate-800 px-3 py-2 rounded-md transition-colors cursor-pointer">Mark applied</button>
+            <div class="flex-1"></div>
+            <button class="inline-flex items-center justify-center h-9 w-9 rounded-md text-slate-500 hover:text-rose-400 hover:bg-rose-500/10 transition-colors cursor-pointer" aria-label="Save job">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 21s-7-4.5-9-9c-1-2.5 1-6 4.5-6 2 0 3 1.2 4.5 3 1.5-1.8 2.5-3 4.5-3 3.5 0 5.5 3.5 4.5 6-2 4.5-9 9-9 9z"/></svg>
+            </button>
+          </div>
+        </article>
+
+      </div>
+
+      <p class="text-center text-xs text-slate-500 mt-6">Showing top 4 of 14 matches · <a href="#" class="underline hover:text-white cursor-pointer">Show all</a></p>
+    </section>
+  </div>
+</main>
+
+<!-- Floating chat button -->
+<button class="fixed bottom-6 right-6 inline-flex items-center gap-2 bg-ink-500 hover:bg-ink-300 text-slate-950 font-bold px-5 py-3.5 rounded-full transition-colors cursor-pointer shadow-lg shadow-ink-500/20">
+  <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+  Ask the coach
+</button>
+
+</body>
+</html>
