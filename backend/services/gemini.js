@@ -61,7 +61,7 @@ async function analyzeResumeFile(filePath, mimeType, language = 'English') {
   const fileBuffer = await fs.readFile(filePath);
   const base64Data = fileBuffer.toString('base64');
 
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
   const result = await model.generateContent([
     { inlineData: { mimeType, data: base64Data } },
@@ -99,7 +99,7 @@ Recommended Jobs: ${userProfile.recommendedJobs}
 Use this context when relevant to provide personalized advice.`;
   }
 
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
 
   const formattedMessages = messages.map(msg => ({
     role: msg.role === 'user' ? 'user' : 'model',
@@ -183,7 +183,7 @@ SUGGESTION SHAPE (strict):
 Return only the JSON array. If you can't find any meaningful improvements, return [].`;
 
 async function suggestResumeImprovements(parsedData, language = 'English', focus = null) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
   const result = await model.generateContent(SUGGEST_PROMPT(parsedData, language, focus));
   const text = (await result.response).text();
   const cleaned = text.replace(/```json|```/g, '').trim();
@@ -264,7 +264,7 @@ OUTPUT STRICTLY this JSON shape (no preamble, no markdown):
 Return ONLY the JSON.`;
 
 async function buildTailoredResume(parsedData, template = 'hybrid', language = 'English', userEmail = null) {
-  const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash' });
+  const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
   const result = await model.generateContent(
     BUILD_PROMPT(parsedData, template, language, userEmail)
   );

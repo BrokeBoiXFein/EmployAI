@@ -7,7 +7,7 @@
 // live in one file.
 // ============================================================
 
-const API_URL = import.meta.env.VITE_API_URL || 'https://employai.onrender.com';
+const API_URL = import.meta.env.VITE_API_URL || 'https://employai-backend-v2.onrender.com';
 
 // We store the JWT in localStorage. Trade-off:
 //   ✓ survives page reloads (vs. in-memory only)
