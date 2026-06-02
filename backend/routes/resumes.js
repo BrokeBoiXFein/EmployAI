@@ -20,9 +20,15 @@ const path = require('path');
 const fs = require('fs').promises;
 const prisma = require('../db');
 const { requireAuth } = require('../middleware/auth');
+const { uploadLimiter, geminiUserLimiter } = require('../middleware/rateLimits');
 const { analyzeResumeFile, suggestResumeImprovements, buildTailoredResume } = require('../services/gemini');
 const { embedText, buildResumeText } = require('../services/embeddings');
 const { renderMarkdown, renderPlainText, renderDocx } = require('../services/resumeRender');
+
+// Hard cap on how many resumes a single user can keep. A real user
+// has 1-5 ("tech", "healthcare", "trades"). 20 is generous for power
+// users and stops a compromised account from filling the DB.
+const MAX_RESUMES_PER_USER = 20;
 
 // ------------------------------------------------------------
 // Apply a coach suggestion to a parsed-resume object.
@@ -94,7 +100,7 @@ const upload = multer({
     },
     filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
   }),
-  limits: { fileSize: 10 * 1024 * 1024 } // 10 MB
+  limits: { fileSize: 5 * 1024 * 1024 } // 5 MB
 });
 
 // Helper: strip the file extension for a default label
@@ -146,10 +152,19 @@ router.get('/:id', async (req, res) => {
 // ------------------------------------------------------------
 // POST /api/resumes  → upload + analyze (create new resume)
 // ------------------------------------------------------------
-router.post('/', upload.single('resume'), async (req, res) => {
+router.post('/', uploadLimiter, upload.single('resume'), async (req, res) => {
   let tempPath = req.file?.path;
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
+    // Hard cap per account — checked BEFORE the Gemini call so a
+    // capped user can't burn API tokens just to be rejected at save.
+    const count = await prisma.resume.count({ where: { userId: req.user.id } });
+    if (count >= MAX_RESUMES_PER_USER) {
+      return res.status(409).json({
+        error: `You can keep up to ${MAX_RESUMES_PER_USER} resumes. Delete one before uploading another.`
+      });
+    }
 
     const { language = 'English', label: providedLabel } = req.body;
 
@@ -321,7 +336,7 @@ router.delete('/:id', async (req, res) => {
 //   come back in their native tongue)
 //   focus is optional free-text the user typed to steer the coach
 //   ("emphasize leadership", "shorter bullets", etc.)
-router.post('/:id/suggestions', async (req, res) => {
+router.post('/:id/suggestions', geminiUserLimiter, async (req, res) => {
   try {
     const resume = await findOwnedResume(req.params.id, req.user.id);
     if (!resume) return res.status(404).json({ error: 'Resume not found' });
@@ -390,7 +405,7 @@ router.post('/:id/apply-suggestion', async (req, res) => {
 // The frontend keeps `structured` in state and posts it back to
 // /export-docx if the user clicks Download — that way we don't
 // burn another Gemini call just to render the same content as docx.
-router.post('/:id/build', async (req, res) => {
+router.post('/:id/build', geminiUserLimiter, async (req, res) => {
   try {
     const resume = await findOwnedResume(req.params.id, req.user.id);
     if (!resume) return res.status(404).json({ error: 'Resume not found' });

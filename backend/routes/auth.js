@@ -12,6 +12,11 @@ const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const prisma = require('../db');
 const { requireAuth } = require('../middleware/auth');
+const {
+  signupHourLimiter,
+  signupDayLimiter,
+  loginLimiter,
+} = require('../middleware/rateLimits');
 
 const router = express.Router();
 
@@ -46,7 +51,7 @@ function publicUser(user) {
 // ------------------------------------------------------------
 // POST /api/auth/signup
 // ------------------------------------------------------------
-router.post('/signup', async (req, res) => {
+router.post('/signup', signupHourLimiter, signupDayLimiter, async (req, res) => {
   try {
     const { email, password, name, preferredLanguage } = req.body || {};
 
@@ -90,7 +95,7 @@ router.post('/signup', async (req, res) => {
 // ------------------------------------------------------------
 // POST /api/auth/login
 // ------------------------------------------------------------
-router.post('/login', async (req, res) => {
+router.post('/login', loginLimiter, async (req, res) => {
   try {
     const { email, password } = req.body || {};
     if (!email || !password) {

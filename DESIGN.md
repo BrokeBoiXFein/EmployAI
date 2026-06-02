@@ -26,31 +26,31 @@ colors:
   edge-dark: "#1e293b"
 typography:
   display:
-    fontFamily: "'EB Garamond', Georgia, serif"
+    fontFamily: "'EB Garamond', 'Noto Serif SC', 'Noto Serif Arabic', 'Noto Serif Devanagari', Georgia, serif"
     fontSize: "clamp(3rem, 7vw, 4.5rem)"
     fontWeight: 500
     lineHeight: 1.05
     letterSpacing: "-0.01em"
   headline:
-    fontFamily: "'EB Garamond', Georgia, serif"
+    fontFamily: "'EB Garamond', 'Noto Serif SC', 'Noto Serif Arabic', 'Noto Serif Devanagari', Georgia, serif"
     fontSize: "clamp(2.25rem, 4vw, 3rem)"
     fontWeight: 500
     lineHeight: 1.15
     letterSpacing: "-0.01em"
   title:
-    fontFamily: "'EB Garamond', Georgia, serif"
+    fontFamily: "'EB Garamond', 'Noto Serif SC', 'Noto Serif Arabic', 'Noto Serif Devanagari', Georgia, serif"
     fontSize: "1.5rem"
     fontWeight: 500
     lineHeight: 1.25
     letterSpacing: "-0.01em"
   body:
-    fontFamily: "'Lato', -apple-system, BlinkMacSystemFont, sans-serif"
+    fontFamily: "'Lato', 'Noto Sans SC', 'Noto Sans Arabic', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, sans-serif"
     fontSize: "1rem"
     fontWeight: 400
     lineHeight: 1.6
     letterSpacing: "normal"
   label:
-    fontFamily: "'Lato', -apple-system, BlinkMacSystemFont, sans-serif"
+    fontFamily: "'Lato', 'Noto Sans SC', 'Noto Sans Arabic', 'Noto Sans Devanagari', -apple-system, BlinkMacSystemFont, sans-serif"
     fontSize: "0.75rem"
     fontWeight: 700
     lineHeight: 1.2
@@ -170,11 +170,11 @@ A constrained, civic palette. Two brand colors do real work; one third color fla
 
 ## 3. Typography
 
-**Display Font:** EB Garamond (with Georgia, serif fallback)
-**Body Font:** Lato (with Inter, system-ui fallback)
-**Label Font:** Lato
+**Display Font:** EB Garamond for Latin; **Noto Serif SC / Arabic / Devanagari** for the three non-Latin scripts the app supports (Chinese, Arabic, Hindi). System fallback: Georgia, serif.
+**Body Font:** Lato for Latin; **Noto Sans SC / Arabic / Devanagari** for the same three scripts. System fallback: -apple-system, BlinkMacSystemFont, sans-serif.
+**Label Font:** Same stack as Body.
 
-**Character:** A serif of civic gravity paired with a sans of operational clarity. EB Garamond gives headlines the weight of something official without looking like a stock SaaS Inter h1. Lato handles every form, label, button, and paragraph at any size with the same calm legibility, including across the six supported scripts.
+**Character:** A serif of civic gravity paired with a sans of operational clarity, designed once across every script the app supports. EB Garamond gives Latin headlines the weight of something official without looking like a stock SaaS Inter h1; Noto Serif carries that same calm authority into Chinese, Arabic, and Devanagari rather than defaulting to whatever the OS picks (PingFang SC, SF Arabic, Devanagari MT, etc., which each have their own unrelated voice). Lato + Noto Sans does the same job for body copy. The browser auto-selects per glyph: Latin characters render in Lato/EB Garamond, Chinese in Noto Sans/Serif SC, Arabic in Noto Sans/Serif Arabic, Hindi in Noto Sans/Serif Devanagari, with no JavaScript lang-switching required. The result: one designed identity across all six UI languages instead of one designed identity plus three system defaults.
 
 ### Hierarchy
 
@@ -186,7 +186,9 @@ A constrained, civic palette. Two brand colors do real work; one third color fla
 
 ### Named Rules
 
-**The Serif-For-Headlines Rule.** Every headline (Display, Headline, Title) gets EB Garamond via the `.h-serif` class. Lato never carries a headline. The pairing is the identity; mixing it dilutes the system.
+**The Serif-For-Headlines Rule.** Every headline (Display, Headline, Title) gets EB Garamond via the `.h-serif` class (Noto Serif for non-Latin scripts via fallback). Lato never carries a headline, regardless of script. The pairing is the identity; mixing it dilutes the system.
+
+**The One-Family-Per-Script Rule.** Each of the six supported languages renders in a designed font, never a system default. Latin uses EB Garamond / Lato; Chinese, Arabic, and Hindi use Noto Serif / Noto Sans for their respective scripts. Falling through to PingFang SC, SF Arabic, or Devanagari MT is forbidden; their visual voices are not the Embassy Desk voice.
 
 **The Eyebrow Rule.** Section transitions are introduced by a Civic Sky uppercase label set at letter-spacing 0.12em. Lowercase eyebrow text is prohibited; tracking below 0.1em is prohibited. The label is half of the visual hierarchy on long-form pages.
 

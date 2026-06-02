@@ -21,6 +21,17 @@ const {
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Trust Render's reverse proxy so req.ip reflects the real client
+// IP. Without this, every request looks like it came from the
+// Render proxy and rate limits collapse onto a single bucket.
+app.set('trust proxy', 1);
+
+// Rate-limit middleware (Tier 1 abuse protection — see middleware/rateLimits.js)
+const {
+  searchLimiter,
+  chatLimiter,
+} = require('./middleware/rateLimits');
+
 // ------------------------------------------------------------
 // CORS — which frontend origins can talk to this API
 // ------------------------------------------------------------
@@ -87,7 +98,7 @@ function blendVectors(resumeVec, intentVec, intentWeight = 0.3) {
   return blended;
 }
 
-app.post('/api/search-jobs', requireAuth, async (req, res) => {
+app.post('/api/search-jobs', requireAuth, searchLimiter, async (req, res) => {
   try {
     const { resumeId, focusText } = req.body || {};
     if (!resumeId) return res.status(400).json({ error: 'resumeId required' });
@@ -173,7 +184,7 @@ app.post('/api/search-jobs', requireAuth, async (req, res) => {
 // ------------------------------------------------------------
 // Chat with Gemini assistant
 // ------------------------------------------------------------
-app.post('/api/chat', async (req, res) => {
+app.post('/api/chat', chatLimiter, async (req, res) => {
   try {
     const { messages, language, userProfile } = req.body;
     const message = await chatWithGemini({ messages, language, userProfile });

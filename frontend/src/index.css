@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=EB+Garamond:wght@400;500;600;700&family=Lato:wght@300;400;700;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=EB+Garamond:wght@400;500;600;700&family=Lato:wght@300;400;700;900&family=Noto+Serif+SC:wght@500&family=Noto+Sans+SC:wght@400;700&family=Noto+Serif+Arabic:wght@500&family=Noto+Sans+Arabic:wght@400;700&family=Noto+Serif+Devanagari:wght@500&family=Noto+Sans+Devanagari:wght@400;700&display=swap');
 @import "tailwindcss";
 
 /* Enable class-based dark mode in Tailwind v4 (default is media-query based).
@@ -27,21 +27,33 @@ body { background: #f8fafc; color: #0c4a6e; }
 
 body {
   margin: 0;
-  /* Lato is the design-system body font (matches the mockups and the
-     redesigned Home). Falls back to Inter for legacy if Lato isn't
-     loaded, then to system sans. */
-  font-family: 'Lato', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Body font: Lato for Latin; Noto Sans for Chinese / Arabic / Devanagari.
+     Browser uses the first font in the list that has a glyph for each
+     character, so Latin chars render in Lato while non-Latin scripts
+     fall through to their script-specific Noto Sans automatically. No
+     JS lang switching required. */
+  font-family: 'Lato',
+               'Noto Sans SC',
+               'Noto Sans Arabic',
+               'Noto Sans Devanagari',
+               'Inter',
+               -apple-system, BlinkMacSystemFont, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
   overflow-x: hidden;
 }
 
-/* Heading font for distinctive titles — used across pages to keep the
-   editorial / employment-platform feel established on the Home page.
-   Apply via className="h-serif" on any element. */
+/* Heading font (apply via className="h-serif"). EB Garamond for Latin;
+   Noto Serif for the three non-Latin scripts the app supports. Picked
+   to match EB Garamond's quiet, civic gravity rather than a more
+   classical / calligraphic feel (see DESIGN.md, Typography section). */
 .h-serif {
-  font-family: 'EB Garamond', Georgia, serif;
+  font-family: 'EB Garamond',
+               'Noto Serif SC',
+               'Noto Serif Arabic',
+               'Noto Serif Devanagari',
+               Georgia, serif;
   letter-spacing: -0.01em;
 }
 
