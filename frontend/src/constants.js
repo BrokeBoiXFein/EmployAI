@@ -49,7 +49,7 @@ export const translations = {
         homePop3: 'Construction',
         homePop4: 'Accounting',
         homeTrustNoFee: 'No fee. No credit card.',
-        homeTrustPrivate: 'Your resume stays private',
+        homeTrustPrivate: 'We never sell your data',
         homeTrustAnyLang: 'Works in any language',
 
         homeHowLabel: 'How it works',
@@ -107,7 +107,7 @@ export const translations = {
         authPassword: 'Password',
         authEmailPh: 'you@example.com',
         authPasswordPh: '••••••••',
-        authPasswordCreatePh: 'At least 8 characters',
+        authPasswordCreatePh: 'At least 10 characters',
         authName: 'Name',
         authNameOptional: '(optional)',
         authNamePh: 'Your name',
@@ -115,7 +115,7 @@ export const translations = {
         authLoggingIn: 'Logging in...',
         authCreate: 'Create account',
         authCreating: 'Creating account...',
-        authPwTooShort: 'Password must be at least 8 characters',
+        authPwTooShort: 'Password must be at least 10 characters',
         authNoAccount: "Don't have an account?",
         authHaveAccount: 'Already have an account?',
 
@@ -323,7 +323,7 @@ export const translations = {
         homePop3: 'Construcción',
         homePop4: 'Contabilidad',
         homeTrustNoFee: 'Sin costo. Sin tarjeta de crédito.',
-        homeTrustPrivate: 'Tu currículum es privado',
+        homeTrustPrivate: 'Nunca vendemos tus datos',
         homeTrustAnyLang: 'Funciona en cualquier idioma',
 
         homeHowLabel: 'Cómo funciona',
@@ -388,7 +388,7 @@ export const translations = {
         authLoggingIn: 'Iniciando sesión...',
         authCreate: 'Crear cuenta',
         authCreating: 'Creando cuenta...',
-        authPwTooShort: 'La contraseña debe tener al menos 8 caracteres',
+        authPwTooShort: 'La contraseña debe tener al menos 10 caracteres',
         authNoAccount: '¿No tienes una cuenta?',
         authHaveAccount: '¿Ya tienes una cuenta?',
 
@@ -586,7 +586,7 @@ export const translations = {
         homePop3: 'Construction',
         homePop4: 'Comptabilité',
         homeTrustNoFee: 'Aucun frais. Pas de carte bancaire.',
-        homeTrustPrivate: 'Votre CV reste privé',
+        homeTrustPrivate: 'Nous ne vendons jamais vos données',
         homeTrustAnyLang: "Fonctionne dans n'importe quelle langue",
 
         homeHowLabel: 'Comment ça marche',
@@ -651,7 +651,7 @@ export const translations = {
         authLoggingIn: 'Connexion...',
         authCreate: 'Créer un compte',
         authCreating: 'Création du compte...',
-        authPwTooShort: 'Le mot de passe doit comporter au moins 8 caractères',
+        authPwTooShort: 'Le mot de passe doit comporter au moins 10 caractères',
         authNoAccount: "Vous n'avez pas de compte ?",
         authHaveAccount: 'Vous avez déjà un compte ?',
 
@@ -849,7 +849,7 @@ export const translations = {
         homePop3: 'بناء',
         homePop4: 'محاسبة',
         homeTrustNoFee: 'بدون رسوم. بدون بطاقة ائتمان.',
-        homeTrustPrivate: 'سيرتك الذاتية تبقى خاصة',
+        homeTrustPrivate: 'لا نبيع بياناتك أبدًا',
         homeTrustAnyLang: 'يعمل بأي لغة',
 
         homeHowLabel: 'كيف يعمل',
@@ -914,7 +914,7 @@ export const translations = {
         authLoggingIn: 'جاري تسجيل الدخول...',
         authCreate: 'إنشاء حساب',
         authCreating: 'جاري إنشاء الحساب...',
-        authPwTooShort: 'كلمة المرور يجب أن تكون 8 أحرف على الأقل',
+        authPwTooShort: 'كلمة المرور يجب أن تكون 10 أحرف على الأقل',
         authNoAccount: 'ليس لديك حساب؟',
         authHaveAccount: 'لديك حساب بالفعل؟',
 
@@ -1112,7 +1112,7 @@ export const translations = {
         homePop3: '建筑',
         homePop4: '会计',
         homeTrustNoFee: '无费用。无信用卡。',
-        homeTrustPrivate: '您的简历保持私密',
+        homeTrustPrivate: '我们绝不出售您的数据',
         homeTrustAnyLang: '支持任何语言',
 
         homeHowLabel: '工作原理',
@@ -1177,7 +1177,7 @@ export const translations = {
         authLoggingIn: '登录中...',
         authCreate: '创建账户',
         authCreating: '创建账户中...',
-        authPwTooShort: '密码必须至少为8个字符',
+        authPwTooShort: '密码必须至少为10个字符',
         authNoAccount: '没有账户？',
         authHaveAccount: '已有账户？',
 
@@ -1375,7 +1375,7 @@ export const translations = {
         homePop3: 'निर्माण',
         homePop4: 'लेखांकन',
         homeTrustNoFee: 'कोई शुल्क नहीं। कोई क्रेडिट कार्ड नहीं।',
-        homeTrustPrivate: 'आपका रिज्यूमे निजी रहता है',
+        homeTrustPrivate: 'हम आपका डेटा कभी नहीं बेचते',
         homeTrustAnyLang: 'किसी भी भाषा में काम करता है',
 
         homeHowLabel: 'यह कैसे काम करता है',
@@ -1440,7 +1440,7 @@ export const translations = {
         authLoggingIn: 'लॉग इन हो रहा है...',
         authCreate: 'खाता बनाएं',
         authCreating: 'खाता बना रहा है...',
-        authPwTooShort: 'पासवर्ड कम से कम 8 अक्षर का होना चाहिए',
+        authPwTooShort: 'पासवर्ड कम से कम 10 अक्षर का होना चाहिए',
         authNoAccount: 'खाता नहीं है?',
         authHaveAccount: 'पहले से खाता है?',
 

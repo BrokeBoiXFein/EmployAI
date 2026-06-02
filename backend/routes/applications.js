@@ -20,6 +20,7 @@
 const express = require('express');
 const prisma = require('../db');
 const { requireAuth } = require('../middleware/auth');
+const { isSafeHttpUrl } = require('../utils/url');
 
 const router = express.Router();
 router.use(requireAuth);
@@ -50,6 +51,9 @@ router.post('/', async (req, res) => {
     const { adzunaId, title, company, applyUrl } = req.body || {};
     if (!adzunaId || !title || !applyUrl) {
       return res.status(400).json({ error: 'adzunaId, title, applyUrl required' });
+    }
+    if (!isSafeHttpUrl(applyUrl)) {
+      return res.status(400).json({ error: 'applyUrl must be a valid http(s) URL' });
     }
 
     // Schema has no unique constraint on (userId, adzunaId) for Application,

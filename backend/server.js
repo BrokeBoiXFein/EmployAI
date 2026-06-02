@@ -1,6 +1,9 @@
 const express = require('express');
 const cors = require('cors');
+const helmet = require('helmet');
 require('dotenv').config();
+
+const IS_PROD = process.env.NODE_ENV === 'production';
 
 const authRoutes = require('./routes/auth');
 const resumeRoutes = require('./routes/resumes');
@@ -33,13 +36,24 @@ const {
 } = require('./middleware/rateLimits');
 
 // ------------------------------------------------------------
+// Security headers (Helmet). API is JSON-only and served cross-origin
+// from GitHub Pages, so we keep CSP off (it governs HTML we don't serve)
+// and disable CORP so the browser doesn't block the cross-origin fetch.
+// ------------------------------------------------------------
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginResourcePolicy: false,
+}));
+
+// ------------------------------------------------------------
 // CORS — which frontend origins can talk to this API
 // ------------------------------------------------------------
+// localhost origins are only allow-listed outside production so a
+// deployed attacker can't pretend to be a local dev frontend.
 const allowedOrigins = [
-  'http://localhost:5173',
-  'http://localhost:3000',
   'https://BrokeBoiXFein.github.io',
-  'https://brokeboixfein.github.io'
+  'https://brokeboixfein.github.io',
+  ...(IS_PROD ? [] : ['http://localhost:5173', 'http://localhost:3000']),
 ];
 
 app.use(cors({
@@ -51,7 +65,7 @@ app.use(cors({
     }
   }
 }));
-app.use(express.json());
+app.use(express.json({ limit: '1mb' }));
 
 // ------------------------------------------------------------
 // Route mounts
@@ -177,21 +191,61 @@ app.post('/api/search-jobs', requireAuth, searchLimiter, async (req, res) => {
     });
   } catch (error) {
     console.error('Job search error:', error);
-    res.status(500).json({ success: false, error: error.message || 'Failed to search jobs' });
+    res.status(500).json({ success: false, error: 'Failed to search jobs' });
   }
 });
 
 // ------------------------------------------------------------
 // Chat with Gemini assistant
 // ------------------------------------------------------------
-app.post('/api/chat', chatLimiter, async (req, res) => {
+// Requires auth (the chat only exists inside the authenticated
+// workspace). We NEVER trust a client-supplied profile — instead we
+// build it server-side from an ownership-checked resume, so a caller
+// can't inject arbitrary text into the system prompt.
+const MAX_CHAT_MESSAGES = 40;
+const MAX_CHAT_CHARS = 4000;
+
+app.post('/api/chat', requireAuth, chatLimiter, async (req, res) => {
   try {
-    const { messages, language, userProfile } = req.body;
-    const message = await chatWithGemini({ messages, language, userProfile });
+    const { messages, language, resumeId } = req.body || {};
+
+    // Validate the conversation array.
+    if (!Array.isArray(messages) || messages.length === 0) {
+      return res.status(400).json({ success: false, error: 'messages array required' });
+    }
+    if (messages.length > MAX_CHAT_MESSAGES) {
+      return res.status(400).json({ success: false, error: 'Conversation too long' });
+    }
+    const safeMessages = messages
+      .filter(m => m && (m.role === 'user' || m.role === 'assistant') && typeof m.content === 'string')
+      .map(m => ({ role: m.role, content: m.content.slice(0, MAX_CHAT_CHARS) }));
+    if (safeMessages.length === 0) {
+      return res.status(400).json({ success: false, error: 'No valid messages' });
+    }
+
+    // Build the profile server-side from an ownership-checked resume.
+    let userProfile = null;
+    if (resumeId) {
+      const resume = await prisma.resume.findFirst({
+        where: { id: resumeId, userId: req.user.id },
+        select: { parsedData: true }
+      });
+      const p = resume?.parsedData;
+      if (p) {
+        userProfile = {
+          name: p.name || '',
+          skills: Array.isArray(p.skills) ? p.skills.join(', ') : '',
+          experience: Array.isArray(p.experience) ? p.experience.map(e => e?.title).filter(Boolean).join(', ') : '',
+          recommendedJobs: Array.isArray(p.recommendedJobTitles) ? p.recommendedJobTitles.join(', ') : ''
+        };
+      }
+    }
+
+    const message = await chatWithGemini({ messages: safeMessages, language, userProfile });
     res.json({ success: true, message });
   } catch (error) {
     console.error('Chat error:', error);
-    res.status(500).json({ success: false, error: error.message || 'Failed to get chat response' });
+    res.status(500).json({ success: false, error: 'Failed to get chat response' });
   }
 });
 

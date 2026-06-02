@@ -57,11 +57,16 @@ router.post('/signup', signupHourLimiter, signupDayLimiter, async (req, res) => 
 
     // Basic validation. We're not trying to be cute here — just block
     // obviously bad input. The DB's @unique on email is the real safety net.
-    if (!email || !password) {
+    if (!email || !password || typeof email !== 'string' || typeof password !== 'string') {
       return res.status(400).json({ error: 'Email and password are required' });
     }
-    if (password.length < 8) {
-      return res.status(400).json({ error: 'Password must be at least 8 characters' });
+    if (password.length < 10) {
+      return res.status(400).json({ error: 'Password must be at least 10 characters' });
+    }
+    // bcrypt silently ignores bytes past 72 — reject so a long password
+    // isn't quietly truncated into something weaker than the user thinks.
+    if (Buffer.byteLength(password, 'utf8') > 72) {
+      return res.status(400).json({ error: 'Password must be 72 bytes or fewer' });
     }
 
     // Check if email is taken BEFORE hashing (hashing is slow).
@@ -129,6 +134,23 @@ router.get('/me', requireAuth, async (req, res) => {
   const user = await prisma.user.findUnique({ where: { id: req.user.id } });
   if (!user) return res.status(404).json({ error: 'User not found' });
   res.json({ user: publicUser(user) });
+});
+
+// ------------------------------------------------------------
+// DELETE /api/auth/account  — erase the account and all its data
+// ------------------------------------------------------------
+// Privacy / GDPR-CCPA right-to-erasure. The schema cascades on
+// userId (Resume, SavedJob, Application all have onDelete: Cascade),
+// so deleting the User row removes every piece of the user's data,
+// including parsed resume PII, in one statement.
+router.delete('/account', requireAuth, async (req, res) => {
+  try {
+    await prisma.user.delete({ where: { id: req.user.id } });
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Delete account error:', err);
+    res.status(500).json({ error: 'Failed to delete account' });
+  }
 });
 
 module.exports = router;

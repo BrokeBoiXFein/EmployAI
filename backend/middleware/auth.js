@@ -30,7 +30,7 @@ function requireAuth(req, res, next) {
   //    If the token was tampered with, or signed with a different
   //    secret, this throws. We catch and 401.
   try {
-    const payload = jwt.verify(token, process.env.JWT_SECRET);
+    const payload = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
     // payload looks like: { userId: "abc123", iat: ..., exp: ... }
     req.user = { id: payload.userId };
     next(); // hand off to the actual route handler
@@ -47,7 +47,7 @@ function optionalAuth(req, res, next) {
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
   if (token) {
     try {
-      const payload = jwt.verify(token, process.env.JWT_SECRET);
+      const payload = jwt.verify(token, process.env.JWT_SECRET, { algorithms: ['HS256'] });
       req.user = { id: payload.userId };
     } catch (_) {
       // bad token? treat as anonymous, don't error

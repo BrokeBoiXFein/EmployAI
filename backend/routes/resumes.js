@@ -17,6 +17,7 @@
 const express = require('express');
 const multer = require('multer');
 const path = require('path');
+const crypto = require('crypto');
 const fs = require('fs').promises;
 const prisma = require('../db');
 const { requireAuth } = require('../middleware/auth');
@@ -89,6 +90,18 @@ router.use(requireAuth);
 // ------------------------------------------------------------
 // Multer config for file uploads (PDF / Word / image)
 // ------------------------------------------------------------
+// Allowed upload types. The frontend `accept=` attribute is cosmetic and
+// trivially bypassed, so the real gate is here (declared MIME) PLUS a
+// magic-byte check after the file lands (declared MIME can be spoofed too).
+const ALLOWED_MIME = new Set([
+  'application/pdf',
+  'image/jpeg',
+  'image/png',
+  'application/msword',                                                       // .doc
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',  // .docx
+]);
+const ALLOWED_EXT = new Set(['.pdf', '.jpg', '.jpeg', '.png', '.doc', '.docx']);
+
 const upload = multer({
   storage: multer.diskStorage({
     destination: async (req, file, cb) => {
@@ -98,10 +111,63 @@ const upload = multer({
         cb(null, uploadDir);
       } catch (err) { cb(err); }
     },
-    filename: (req, file, cb) => cb(null, Date.now() + '-' + file.originalname)
+    // Random filename + sanitized extension only. NEVER reuse the
+    // client's originalname in the path — it can contain "../" and
+    // escape the upload directory.
+    filename: (req, file, cb) => {
+      const ext = path.extname(path.basename(file.originalname || '')).toLowerCase();
+      const safeExt = ALLOWED_EXT.has(ext) ? ext : '';
+      cb(null, `${crypto.randomUUID()}${safeExt}`);
+    }
   }),
-  limits: { fileSize: 5 * 1024 * 1024 } // 5 MB
+  limits: { fileSize: 5 * 1024 * 1024, files: 1 }, // 5 MB, single file
+  fileFilter: (req, file, cb) => {
+    const ext = path.extname(path.basename(file.originalname || '')).toLowerCase();
+    if (ALLOWED_MIME.has(file.mimetype) && ALLOWED_EXT.has(ext)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Unsupported file type. Upload a PDF, Word doc, or image.'));
+    }
+  }
 });
+
+// Magic-byte ("file signature") check. The declared MIME type is just a
+// string the client sends — this verifies the actual bytes match an
+// allowed format before we hand the file to Gemini.
+async function verifyFileSignature(filePath) {
+  let fd;
+  try {
+    fd = await fs.open(filePath, 'r');
+    const { buffer, bytesRead } = await fd.read(Buffer.alloc(8), 0, 8, 0);
+    const b = buffer.subarray(0, bytesRead);
+    const startsWith = (sig) => b.length >= sig.length && sig.every((x, i) => b[i] === x);
+    return (
+      startsWith([0x25, 0x50, 0x44, 0x46]) ||              // %PDF
+      startsWith([0xff, 0xd8, 0xff]) ||                    // JPEG
+      startsWith([0x89, 0x50, 0x4e, 0x47]) ||             // PNG
+      startsWith([0x50, 0x4b, 0x03, 0x04]) ||             // ZIP/DOCX
+      startsWith([0xd0, 0xcf, 0x11, 0xe0])               // OLE/legacy .doc
+    );
+  } catch (_) {
+    return false;
+  } finally {
+    if (fd) await fd.close();
+  }
+}
+
+// Run multer but turn its errors (bad type, too large) into clean JSON
+// 400s instead of Express's default HTML 500 page.
+function handleUpload(req, res, next) {
+  upload.single('resume')(req, res, (err) => {
+    if (err) {
+      const msg = (err instanceof multer.MulterError && err.code === 'LIMIT_FILE_SIZE')
+        ? 'File too large (max 5 MB).'
+        : (err.message || 'Upload failed');
+      return res.status(400).json({ error: msg });
+    }
+    next();
+  });
+}
 
 // Helper: strip the file extension for a default label
 function defaultLabelFromFilename(filename) {
@@ -152,10 +218,16 @@ router.get('/:id', async (req, res) => {
 // ------------------------------------------------------------
 // POST /api/resumes  → upload + analyze (create new resume)
 // ------------------------------------------------------------
-router.post('/', uploadLimiter, upload.single('resume'), async (req, res) => {
+router.post('/', uploadLimiter, handleUpload, async (req, res) => {
   let tempPath = req.file?.path;
   try {
     if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+
+    // Verify the actual file bytes match an allowed format (not just the
+    // client-declared MIME type) BEFORE spending a Gemini call on it.
+    if (!(await verifyFileSignature(req.file.path))) {
+      return res.status(400).json({ error: 'File contents do not match a supported format (PDF, Word, or image).' });
+    }
 
     // Hard cap per account — checked BEFORE the Gemini call so a
     // capped user can't burn API tokens just to be rejected at save.
@@ -230,7 +302,7 @@ router.post('/', uploadLimiter, upload.single('resume'), async (req, res) => {
     });
   } catch (err) {
     console.error('Create resume error:', err);
-    res.status(500).json({ error: err.message || 'Failed to create resume' });
+    res.status(500).json({ error: 'Failed to create resume' });
   } finally {
     // Always clean up the temp file
     if (tempPath) {
@@ -355,7 +427,7 @@ router.post('/:id/suggestions', geminiUserLimiter, async (req, res) => {
     res.json({ suggestions });
   } catch (err) {
     console.error('Suggestions error:', err);
-    res.status(500).json({ error: err.message || 'Failed to generate suggestions' });
+    res.status(500).json({ error: 'Failed to generate suggestions' });
   }
 });
 
@@ -391,7 +463,7 @@ router.post('/:id/apply-suggestion', async (req, res) => {
     res.json({ resume: updated });
   } catch (err) {
     console.error('Apply suggestion error:', err);
-    res.status(500).json({ error: err.message || 'Failed to apply suggestion' });
+    res.status(500).json({ error: 'Failed to apply suggestion' });
   }
 });
 
@@ -431,7 +503,7 @@ router.post('/:id/build', geminiUserLimiter, async (req, res) => {
     res.json({ structured, markdown, plainText });
   } catch (err) {
     console.error('Build resume error:', err);
-    res.status(500).json({ error: err.message || 'Failed to build resume' });
+    res.status(500).json({ error: 'Failed to build resume' });
   }
 });
 
@@ -459,7 +531,7 @@ router.post('/:id/export-docx', async (req, res) => {
     res.send(buffer);
   } catch (err) {
     console.error('Export docx error:', err);
-    res.status(500).json({ error: err.message || 'Failed to export .docx' });
+    res.status(500).json({ error: 'Failed to export .docx' });
   }
 });
 

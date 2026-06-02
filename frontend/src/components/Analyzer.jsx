@@ -251,15 +251,13 @@ export default function Analyzer() {
         setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
         setChatLoading(true);
         try {
-            const userProfile = analysis ? {
-                name: analysis.name,
-                skills: (analysis.skills || []).join(', '),
-                experience: (analysis.experience || []).map(e => e.title).join(', '),
-                recommendedJobs: (analysis.recommendedJobTitles || []).join(', ')
-            } : null;
+            // The server builds the profile from this resume (ownership-checked).
+            // We no longer send profile text from the client — that kept the
+            // system prompt free of client-injected content.
             const data = await api.post('/api/chat', {
                 messages: messages.concat([{ role: 'user', content: userMessage }]),
-                language: t.languageName, userProfile
+                language: t.languageName,
+                resumeId: activeResumeId || undefined
             });
             if (data.success) setMessages(prev => [...prev, { role: 'assistant', content: data.message }]);
             else throw new Error(data.error || 'Failed to get response');

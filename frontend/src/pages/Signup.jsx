@@ -23,7 +23,7 @@ export default function Signup() {
   const onSubmit = async (e) => {
     e.preventDefault();
     if (submitting) return;
-    if (password.length < 8) return;
+    if (password.length < 10) return;
     setSubmitting(true);
     try {
       await signup({ email, password, name, preferredLanguage: language });
@@ -32,7 +32,7 @@ export default function Signup() {
     finally { setSubmitting(false); }
   };
 
-  const pwTooShort = password.length > 0 && password.length < 8;
+  const pwTooShort = password.length > 0 && password.length < 10;
 
   const inputCls = (extra = '') =>
     `w-full rounded-md pl-10 pr-4 py-2.5
@@ -89,7 +89,7 @@ export default function Signup() {
             <label className="block text-sm font-medium mb-1.5 text-slate-700 dark:text-slate-200">{t.authPassword}</label>
             <div className="relative">
               <Lock className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 dark:text-slate-500" />
-              <input type="password" required minLength={8} value={password}
+              <input type="password" required minLength={10} value={password}
                      onChange={(e) => { setPassword(e.target.value); if (error) clearError(); }}
                      className={inputCls(pwTooShort ? 'border-amber-500 dark:border-amber-500/60' : '')}
                      placeholder={t.authPasswordCreatePh} />
